@@ -16,8 +16,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app import razorpay_client
+from app.forecast import forecast_cash_position
 from app.invariants.conservation_check import check_conservation, try_z3_check
 from app.metrics import generalization_report, measure_throughput, score_reconciliation
+from app.qa_agent import answer_question
 from app.reconciliation.proof_chain import ProofChain
 from app.selftest.adversarial_gen import run_fixed_suite, run_llm_suite
 from data.generate_ledger import generate_ledger
@@ -81,6 +83,20 @@ def main(n: int = 60) -> None:
     known_limitations = fixed_suite["blind_spots"] + (llm_suite["blind_spots"] if llm_suite else [])
     with open(FIXTURES_DIR / "known_limitations.json", "w") as f:
         json.dump(known_limitations, f, indent=2)
+
+    print("\n=== Stretch: cash forecast (settlement-timing projection, not a revenue forecast) ===")
+    forecast = forecast_cash_position(payments, proofs)
+    print(json.dumps(forecast, indent=2))
+
+    print("\n=== Stretch: settlement Q&A ===")
+    exceptions = [p for p in proofs if p.is_exception]
+    if exceptions:
+        sample_question = f"why didn't {exceptions[0].payment_id} settle correctly?"
+        qa_result = answer_question(sample_question, payments, ledger, proofs)
+        print(f"Q: {sample_question}")
+        print(json.dumps(qa_result, indent=2))
+    else:
+        print("(no exceptions in this batch to ask about)")
 
     print(f"\nSaved proof chain and known limitations to {FIXTURES_DIR}")
     print("Verify the saved chain independently with: python scripts/verify_chain.py")

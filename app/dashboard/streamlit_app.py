@@ -16,8 +16,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app import razorpay_client
+from app.forecast import forecast_cash_position
 from app.invariants.conservation_check import check_conservation, try_z3_check
 from app.metrics import generalization_report, measure_throughput, score_reconciliation
+from app.qa_agent import answer_question
 from app.reconciliation.proof_chain import ProofChain
 from app.selftest.adversarial_gen import run_fixed_suite, run_llm_suite
 from data.generate_ledger import generate_ledger
@@ -86,8 +88,15 @@ st.caption(
     "the honest, out-of-distribution number."
 )
 
-tab1, tab2, tab3, tab4 = st.tabs(
-    ["Layer 1 — Reconciliation", "Re-verify everything", "Layer 2 — Conservation", "Layer 3 — Blind spots"]
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
+    [
+        "Layer 1 — Reconciliation",
+        "Re-verify everything",
+        "Layer 2 — Conservation",
+        "Layer 3 — Blind spots",
+        "Ask the ledger (Q&A)",
+        "Cash forecast",
+    ]
 )
 
 with tab1:
@@ -177,3 +186,40 @@ with tab4:
     if llm_suite and llm_suite["blind_spots"]:
         st.subheader("Known limitations (AI-generated suite)")
         st.dataframe(llm_suite["blind_spots"], use_container_width=True)
+
+with tab5:
+    st.subheader("Ask the ledger")
+    st.caption(
+        "Grounded only in the proof records already computed above — never re-derives a number "
+        "itself, cites exactly which record(s) it used. Requires ANTHROPIC_API_KEY."
+    )
+    question = st.text_input("Ask about a specific payment (e.g. \"why didn't pay_0011 settle?\") or the batch in general")
+    if st.button("Ask") and question:
+        result = answer_question(question, payments, ledger, proofs)
+        if result["answered"]:
+            st.write(result["answer"])
+            st.caption(f"Grounded in: {', '.join(result['grounded_in']) or '(none)'}")
+        else:
+            st.info(f"Not answered — {result['reason']}")
+
+with tab6:
+    st.subheader("Cash forecast")
+    st.caption(
+        "A settlement-timing projection of money already captured — not a revenue forecast. "
+        "Every assumption is listed explicitly below, not baked in silently."
+    )
+    horizon = st.slider("Horizon (days)", 3, 14, 7)
+    forecast = forecast_cash_position(payments, proofs, horizon_days=horizon)
+
+    fcol1, fcol2, fcol3 = st.columns(3)
+    fcol1.metric("Confirmed settled today", f"₹{forecast['confirmed_settled_today']}")
+    fcol2.metric("Pending", f"₹{forecast['pending_amount']}", f"{forecast['pending_count']} records")
+    fcol3.metric("At risk (excluded)", f"₹{forecast['at_risk_amount']}", f"{forecast['at_risk_count']} records")
+
+    st.line_chart(
+        {"projected_cash": [float(day["projected_cash"]) for day in forecast["timeline"]]},
+    )
+
+    st.subheader("Assumptions")
+    for a in forecast["assumptions"]:
+        st.write(f"- {a}")
