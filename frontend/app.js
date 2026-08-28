@@ -56,7 +56,6 @@ function renderDonut(breakdown, precision) {
   const centerEl = document.getElementById("donut-center");
   centerEl.textContent = precision.toFixed(2);
   centerEl.style.color = TEAL;
-  centerEl.style.textShadow = "0 0 14px rgba(126,200,194,0.5)";
   document.getElementById("donut-sub").textContent = `${breakdown.length} outcome type(s) across the batch`;
 
   const total = breakdown.reduce((s, b) => s + b.count, 0) || 1;
@@ -69,8 +68,7 @@ function renderDonut(breakdown, precision) {
     const start = acc, end = acc + frac - 0.01; // small gap between segments
     const color = colorForRule(b.label, i);
     paths += `<path d="${ringPath(cx, cy, r, start, Math.max(end, start))}" fill="none"
-      stroke="${color}" stroke-width="16" stroke-linecap="round"
-      style="filter:drop-shadow(0 0 5px ${color})"/>`;
+      stroke="${color}" stroke-width="16" stroke-linecap="round"/>`;
     acc += frac;
   });
   svg.innerHTML = paths;
@@ -81,7 +79,7 @@ function renderDonut(breakdown, precision) {
       const pct = Math.round((100 * b.count) / total);
       const color = colorForRule(b.label, i);
       return `<div class="donut-legend-item">
-        <span class="legend-dot filled" style="background:${color};border-color:${color};box-shadow:0 0 6px ${color}"></span>
+        <span class="legend-dot filled" style="background:${color};border-color:${color}"></span>
         <span class="legend-text">${b.label}</span>
         <span class="legend-value">${b.count} · ${pct}%</span>
       </div>`;
@@ -98,7 +96,7 @@ function ringTile(label, valueText, frac, color) {
       <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="5"/>
       <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="5"
         stroke-dasharray="${dash} ${circumference - dash}" stroke-linecap="round"
-        transform="rotate(-90 ${cx} ${cy})" style="filter:drop-shadow(0 0 4px ${color})"/>
+        transform="rotate(-90 ${cx} ${cy})"/>
     </svg>
     <div>
       <div class="label">${label}</div>
@@ -156,10 +154,9 @@ function renderConservationGoal(conservation) {
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="6"/>
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="6"
       stroke-dasharray="${dash} ${circumference - dash}" stroke-linecap="round"
-      transform="rotate(-90 ${cx} ${cy})" style="filter:drop-shadow(0 0 5px ${color})"/>`;
+      transform="rotate(-90 ${cx} ${cy})"/>`;
   const valueEl = document.getElementById("conservation-value");
   valueEl.style.color = color;
-  valueEl.style.textShadow = `0 0 12px ${color}`;
   valueEl.textContent = conservation.balanced
     ? "Balanced"
     : `₹${conservation.net_drift_across_recorded_entries} drift`;
@@ -185,8 +182,7 @@ function renderForecast(forecast) {
   const areaPoints = `${pad},${h - pad} ${points} ${w - pad},${h - pad}`;
   document.getElementById("linechart").innerHTML = `
     <polygon points="${areaPoints}" fill="rgba(126,200,194,0.12)" />
-    <polyline points="${points}" fill="none" stroke="${TEAL}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
-      style="filter:drop-shadow(0 0 4px ${TEAL})"/>`;
+    <polyline points="${points}" fill="none" stroke="${TEAL}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
 }
 
 function renderAtRisk(forecast) {
