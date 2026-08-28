@@ -19,22 +19,24 @@
         </div>
       </div>
       <div class="tabs">
-        <div class="tab active">Dashboard</div>
-        <div class="tab">Reconciliation</div>
-        <div class="tab">Forecast</div>
+        <div class="tab active" data-target="dashboard">Dashboard</div>
+        <div class="tab" data-target="reconciliation">Reconciliation</div>
+        <div class="tab" data-target="forecast">Forecast</div>
       </div>
     </div>
-    <div class="header-icons">
-      <button class="icon-btn">⌕</button>
-      <button class="icon-btn">⚑</button>
-      <button class="icon-btn">⚙</button>
+    <div class="header-icons" style="position:relative;">
+      <button class="icon-btn" id="search-btn" title="Search exceptions by payment id">⌕</button>
+      <button class="icon-btn" id="flag-btn" title="Jump to exceptions">⚑</button>
+      <button class="icon-btn" id="settings-btn" title="Batch info">⚙</button>
+      <input id="search-input" type="text" placeholder="pay_00…" style="display:none;position:absolute;top:40px;right:0;background:#000;border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:6px 10px;font-size:12px;width:140px;" />
+      <div id="settings-panel" style="display:none;position:absolute;top:40px;right:0;background:#000;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:12px;width:200px;z-index:5;"></div>
     </div>
   </div>
 
   <div class="grid">
 
     <!-- Column 1 -->
-    <div class="col">
+    <div class="col" data-tab="reconciliation">
       <div class="card donut-card">
         <div class="card-title">Reconciliation for this batch</div>
         <div class="card-sub" id="donut-sub">—</div>
@@ -58,7 +60,7 @@
     </div>
 
     <!-- Column 2 -->
-    <div class="col">
+    <div class="col" data-tab="reconciliation">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
           <div>
@@ -82,7 +84,7 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" id="exceptions-card">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div class="card-title">Exceptions</div>
           <span class="stat-tag" id="exception-total-tag">—</span>
@@ -98,10 +100,11 @@
         </div>
       </div>
       <button class="cta-btn" id="reverify-btn">Re-verify everything — zero AI calls</button>
+      <div id="reverify-status" style="font-size:11.5px;color:var(--muted);margin-top:8px;text-align:center;"></div>
     </div>
 
     <!-- Column 3 -->
-    <div class="col">
+    <div class="col" data-tab="forecast">
       <div class="card">
         <div class="card-title">Cash forecast</div>
         <div class="card-sub">Settlement-timing projection, not a revenue forecast</div>
@@ -136,10 +139,10 @@
   </div>
 
   <div class="footer-nav">
-    <div class="footer-nav-item active"><span class="icon">▦</span>Dashboard</div>
-    <div class="footer-nav-item"><span class="icon">✓</span>Reconciliation</div>
-    <div class="footer-nav-item"><span class="icon">◇</span>Forecast</div>
-    <div class="footer-nav-item"><span class="icon">▤</span>Docs</div>
+    <div class="footer-nav-item active" data-target="dashboard"><span class="icon">▦</span>Dashboard</div>
+    <div class="footer-nav-item" data-target="reconciliation"><span class="icon">✓</span>Reconciliation</div>
+    <div class="footer-nav-item" data-target="forecast"><span class="icon">◇</span>Forecast</div>
+    <a class="footer-nav-item" href="https://github.com/Specter842/razorpay-finance-controller#readme" target="_blank" rel="noopener" style="text-decoration:none;"><span class="icon">▤</span>Docs</a>
   </div>
 
 </div>

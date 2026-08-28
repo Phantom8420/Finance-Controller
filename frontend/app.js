@@ -35,11 +35,101 @@ function render(data) {
   renderGeneralization(data.generalization);
 
   document.getElementById("reverify-btn").addEventListener("click", () => {
-    alert(
+    const statusEl = document.getElementById("reverify-status");
+    statusEl.textContent =
       data.reverify.chain_intact && data.reverify.all_math_ok
-        ? `${data.reverify.checked}/${data.reverify.checked} proofs independently re-verified. Chain intact. Zero AI calls.`
-        : "Verification found an issue — see scripts/verify_chain.py output."
-    );
+        ? `${data.reverify.checked}/${data.reverify.checked} proofs independently re-verified. Chain intact.`
+        : "Verification found an issue — see scripts/verify_chain.py output.";
+    statusEl.style.color = data.reverify.chain_intact && data.reverify.all_math_ok ? TEAL : ACCENT_ORANGE;
+  });
+
+  initNav();
+  initHeaderIcons(data);
+}
+
+// ---------- Navigation: header tabs + footer nav both drive the same
+// three-way filter over the .col sections. Both sets of controls stay in
+// sync with each other and with the actual visible content.
+function setActiveTab(name) {
+  document.querySelectorAll("[data-target]").forEach((el) => el.classList.toggle("active", el.dataset.target === name));
+  let visibleCount = 0;
+  document.querySelectorAll(".col[data-tab]").forEach((col) => {
+    const show = name === "dashboard" || col.dataset.tab === name;
+    col.style.display = show ? "" : "none";
+    if (show) visibleCount += 1;
+  });
+  const grid = document.querySelector(".grid");
+  grid.style.gridTemplateColumns = visibleCount === 1 ? "1fr" : visibleCount === 2 ? "1.15fr 1fr" : "1.15fr 1fr 1fr";
+}
+
+function initNav() {
+  document.querySelectorAll("[data-target]").forEach((el) => {
+    if (el.tagName === "A") return; // Docs link navigates normally, not a tab
+    el.addEventListener("click", () => setActiveTab(el.dataset.target));
+  });
+  setActiveTab("dashboard");
+}
+
+// ---------- Header icons: search filters the exceptions list live, flag
+// jumps to it, settings shows real batch metadata from this run.
+function initHeaderIcons(data) {
+  const searchBtn = document.getElementById("search-btn");
+  const searchInput = document.getElementById("search-input");
+  const flagBtn = document.getElementById("flag-btn");
+  const settingsBtn = document.getElementById("settings-btn");
+  const settingsPanel = document.getElementById("settings-panel");
+
+  function closePopovers() {
+    searchInput.style.display = "none";
+    settingsPanel.style.display = "none";
+  }
+
+  function jumpToExceptions() {
+    setActiveTab("reconciliation");
+    const card = document.getElementById("exceptions-card");
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.style.outline = `1px solid ${ACCENT_ORANGE}`;
+    setTimeout(() => (card.style.outline = ""), 1200);
+  }
+
+  searchBtn.addEventListener("click", () => {
+    const opening = searchInput.style.display === "none";
+    closePopovers();
+    searchInput.style.display = opening ? "block" : "none";
+    if (opening) searchInput.focus();
+  });
+
+  searchInput.addEventListener("input", () => {
+    const q = searchInput.value.trim().toLowerCase();
+    document.querySelectorAll("#exception-list .list-item").forEach((row) => {
+      const id = (row.querySelector(".list-pill")?.textContent || "").toLowerCase();
+      row.style.display = !q || id.includes(q) ? "" : "none";
+    });
+    if (q) jumpToExceptions();
+  });
+
+  flagBtn.addEventListener("click", () => {
+    closePopovers();
+    jumpToExceptions();
+  });
+
+  settingsBtn.addEventListener("click", () => {
+    const opening = settingsPanel.style.display === "none";
+    closePopovers();
+    if (opening) {
+      settingsPanel.innerHTML = `
+        <div style="color:var(--muted);margin-bottom:6px;">BATCH INFO</div>
+        <div>Source: ${data.data_source}</div>
+        <div>Records: ${data.batch_size}</div>
+        <div>Throughput: ${data.throughput.records_per_second} rec/s</div>
+        <div style="margin-top:6px;color:var(--muted);">Regenerate with:</div>
+        <code style="font-size:10.5px;">python scripts/export_dashboard_data.py</code>`;
+      settingsPanel.style.display = "block";
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".header-icons")) closePopovers();
   });
 }
 
@@ -134,13 +224,25 @@ function renderExceptions(data) {
   }
   el.innerHTML = data.exceptions
     .map(
-      (e) => `<div class="list-item">
+      (e) => `<div class="list-item" data-payment-id="${e.payment_id}">
       <span class="list-pill">${e.payment_id}</span>
       <span class="list-label list-sub">${e.reason}</span>
-      <button class="list-btn">Review</button>
+      <button class="list-btn" data-payment-id="${e.payment_id}">Review</button>
     </div>`
     )
     .join("");
+
+  el.querySelectorAll(".list-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.paymentId;
+      setActiveTab("reconciliation");
+      const row = el.querySelector(`.list-item[data-payment-id="${id}"]`);
+      if (!row) return;
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      row.style.background = "rgba(255,107,53,0.12)";
+      setTimeout(() => (row.style.background = ""), 1500);
+    });
+  });
 }
 
 function renderConservationGoal(conservation) {
