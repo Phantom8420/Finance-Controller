@@ -1,0 +1,177 @@
+:root {
+  --bg: #000000;
+  --fg: #ffffff;
+  --line: rgba(255, 255, 255, 0.9);
+  --line-dim: rgba(255, 255, 255, 0.22);
+  --muted: rgba(255, 255, 255, 0.55);
+  --track: rgba(255, 255, 255, 0.12);
+  --radius: 18px;
+
+  /* the splash: everything else stays strict black/white, these three do
+     all the accenting - light teal for healthy/confirmed, dark teal for
+     secondary categories, orange for exceptions and at-risk amounts */
+  --teal: #7ec8c2;
+  --teal-dark: #33605a;
+  --accent-orange: #ff6b35;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  padding: 20px;
+}
+
+.shell {
+  max-width: 1400px;
+  margin: 0 auto;
+  border: 1.5px solid var(--line);
+  border-radius: 24px;
+  padding: 20px 24px 26px;
+}
+
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line-dim);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.brand-row { display: flex; align-items: center; gap: 14px; }
+.brand-mark {
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 1.5px solid var(--teal);
+  box-shadow: 0 0 18px -2px var(--teal);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.brand-text .title { font-weight: 700; font-size: 16px; }
+.brand-text .subtitle { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+
+.header-icons { display: flex; gap: 10px; align-items: center; }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--line-dim); display: flex; align-items: center; justify-content: center;
+  color: var(--fg); font-size: 14px; background: transparent; cursor: pointer;
+}
+
+.tabs { display: flex; gap: 26px; margin-top: 4px; }
+.tab { color: var(--muted); font-size: 13.5px; padding-bottom: 6px; cursor: pointer; }
+.tab.active { color: var(--fg); font-weight: 600; border-bottom: 2px solid var(--teal); }
+
+/* ---------- Grid ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 1050px) { .grid { grid-template-columns: 1fr; } }
+
+.col { display: flex; flex-direction: column; gap: 16px; }
+
+.card {
+  border: 1px solid var(--line-dim);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.card-title { font-weight: 600; font-size: 14.5px; }
+.card-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+/* ---------- Donut card ---------- */
+.donut-card { display: flex; flex-direction: column; }
+.donut-body { display: flex; align-items: center; gap: 18px; margin-top: 14px; }
+.donut-center-value { font-size: 24px; font-weight: 700; }
+.donut-center-label { color: var(--muted); font-size: 11px; margin-top: 2px; text-align: center; }
+.donut-legend { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.donut-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--fg); flex-shrink: 0; }
+.legend-dot.filled { background: var(--fg); }
+.legend-text { flex: 1; }
+.legend-value { color: var(--muted); font-size: 12px; }
+
+/* ---------- Ring tiles ---------- */
+.ring-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ring-tile {
+  border: 1px solid var(--line-dim); border-radius: 14px; padding: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.ring-tile .label { font-size: 12px; }
+.ring-tile .value { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ---------- Progress bars ---------- */
+.progress-row { margin-bottom: 12px; }
+.progress-label-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.progress-track { height: 8px; background: var(--track); border-radius: 5px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--teal); border-radius: 5px; box-shadow: 0 0 8px -1px var(--teal); }
+.progress-fill.warn { background: var(--accent-orange); box-shadow: 0 0 8px -1px var(--accent-orange); }
+
+.big-number { font-size: 30px; font-weight: 700; color: var(--teal); text-shadow: 0 0 16px rgba(126, 200, 194, 0.45); }
+.big-number-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ---------- List card ---------- */
+.list-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 0;
+  border-bottom: 1px solid var(--line-dim);
+}
+.list-item:last-child { border-bottom: none; }
+.list-pill {
+  font-size: 10.5px; border: 1px solid var(--accent-orange); color: var(--accent-orange);
+  border-radius: 6px; padding: 2px 6px; flex-shrink: 0;
+}
+.list-label { flex: 1; font-size: 12.5px; }
+.list-sub { color: var(--muted); font-size: 11px; }
+.list-btn {
+  border: 1px solid var(--accent-orange); border-radius: 8px; padding: 5px 10px; font-size: 11px;
+  color: var(--accent-orange); background: transparent; cursor: pointer; flex-shrink: 0;
+}
+.list-btn:hover { background: var(--accent-orange); color: var(--bg); }
+.list-btn.filled { background: var(--fg); color: var(--bg); font-weight: 600; }
+
+/* ---------- Goal ring + CTA ---------- */
+.goal-card { display: flex; align-items: center; gap: 16px; }
+.goal-text { flex: 1; }
+.goal-value { font-size: 20px; font-weight: 700; }
+.goal-label { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+.cta-btn {
+  width: 100%; margin-top: 14px; border: 1.5px solid var(--teal); border-radius: 999px;
+  padding: 11px; text-align: center; font-weight: 600; font-size: 13px; cursor: pointer;
+  background: transparent; color: var(--teal);
+  box-shadow: 0 0 20px -6px var(--teal);
+}
+.cta-btn:hover { background: var(--teal); color: var(--bg); box-shadow: 0 0 28px -4px var(--teal); }
+
+/* ---------- Line chart ---------- */
+.chart-value { font-size: 28px; font-weight: 700; margin-top: 4px; color: var(--teal); text-shadow: 0 0 16px rgba(126, 200, 194, 0.4); }
+.chart-sub { color: var(--muted); font-size: 11.5px; }
+.badge-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.badge {
+  border: 1px solid var(--teal); color: var(--teal);
+  border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 600;
+}
+.badge.outline { border: 1px dashed var(--accent-orange); color: var(--accent-orange); }
+
+/* ---------- Stat cards ---------- */
+.stat-card { display: flex; justify-content: space-between; align-items: flex-start; }
+.stat-value { font-size: 26px; font-weight: 700; margin-top: 6px; }
+#at-risk-value { color: var(--accent-orange); text-shadow: 0 0 16px rgba(255, 107, 53, 0.4); }
+#generalization-value { color: var(--teal); text-shadow: 0 0 16px rgba(126, 200, 194, 0.4); }
+.stat-caption { color: var(--muted); font-size: 11.5px; margin-top: 4px; max-width: 70%; }
+.stat-tag { font-size: 10.5px; border: 1px solid var(--line-dim); border-radius: 6px; padding: 2px 6px; color: var(--muted); }
+.stat-icon { font-size: 20px; }
+
+/* ---------- Footer nav ---------- */
+.footer-nav {
+  display: flex; justify-content: center; gap: 60px;
+  border-top: 1px solid var(--line-dim); margin-top: 20px; padding-top: 14px;
+}
+.footer-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--muted); font-size: 10.5px; }
+.footer-nav-item.active { color: var(--fg); }
+.footer-nav-item .icon { font-size: 16px; }

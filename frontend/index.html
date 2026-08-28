@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Finance Controller</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="shell">
+
+  <div class="header">
+    <div>
+      <div class="brand-row">
+        <div class="brand-mark">🧾</div>
+        <div class="brand-text">
+          <div class="title">AI Finance Controller</div>
+          <div class="subtitle" id="subtitle">Loading batch…</div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab active">Dashboard</div>
+        <div class="tab">Reconciliation</div>
+        <div class="tab">Forecast</div>
+      </div>
+    </div>
+    <div class="header-icons">
+      <button class="icon-btn">⌕</button>
+      <button class="icon-btn">⚑</button>
+      <button class="icon-btn">⚙</button>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- Column 1 -->
+    <div class="col">
+      <div class="card donut-card">
+        <div class="card-title">Reconciliation for this batch</div>
+        <div class="card-sub" id="donut-sub">—</div>
+        <div class="donut-body">
+          <div style="position:relative">
+            <svg id="donut" width="150" height="150" viewBox="0 0 150 150"></svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <div class="donut-center-value" id="donut-center">—</div>
+              <div class="donut-center-label">precision</div>
+            </div>
+          </div>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Layer status</div>
+        <div class="card-sub">At a glance, each layer's own verdict</div>
+        <div class="ring-grid" id="ring-grid" style="margin-top:14px;"></div>
+      </div>
+    </div>
+
+    <!-- Column 2 -->
+    <div class="col">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div class="card-title">Batch progress</div>
+            <div class="card-sub">Verified vs. flagged for review</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="big-number" id="confirmed-value">—</div>
+            <div class="big-number-label">confirmed settled</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;">
+          <div class="progress-row">
+            <div class="progress-label-row"><span>VERIFIED</span><span id="verified-count">—</span></div>
+            <div class="progress-track"><div class="progress-fill" id="verified-bar"></div></div>
+          </div>
+          <div class="progress-row">
+            <div class="progress-label-row"><span>EXCEPTIONS</span><span id="exception-count">—</span></div>
+            <div class="progress-track"><div class="progress-fill warn" id="exception-bar"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="card-title">Exceptions</div>
+          <span class="stat-tag" id="exception-total-tag">—</span>
+        </div>
+        <div id="exception-list" style="margin-top:8px;max-height:220px;overflow-y:auto;"></div>
+      </div>
+
+      <div class="card goal-card">
+        <svg id="conservation-ring" width="72" height="72" viewBox="0 0 72 72"></svg>
+        <div class="goal-text">
+          <div class="goal-label">Layer 2 · conservation</div>
+          <div class="goal-value" id="conservation-value">—</div>
+        </div>
+      </div>
+      <button class="cta-btn" id="reverify-btn">Re-verify everything — zero AI calls</button>
+    </div>
+
+    <!-- Column 3 -->
+    <div class="col">
+      <div class="card">
+        <div class="card-title">Cash forecast</div>
+        <div class="card-sub">Settlement-timing projection, not a revenue forecast</div>
+        <div class="chart-value" id="forecast-value">—</div>
+        <div class="chart-sub" id="forecast-sub">—</div>
+        <svg id="linechart" width="100%" height="90" viewBox="0 0 320 90" preserveAspectRatio="none" style="margin-top:8px;"></svg>
+        <div class="badge-row">
+          <span class="badge" id="badge-confirmed">—</span>
+          <span class="badge outline" id="badge-pending">—</span>
+        </div>
+      </div>
+
+      <div class="card stat-card">
+        <div>
+          <div class="card-sub">AT RISK (EXCLUDED)</div>
+          <div class="stat-value" id="at-risk-value">—</div>
+          <div class="stat-caption" id="at-risk-caption">—</div>
+        </div>
+        <div class="stat-icon">⚑</div>
+      </div>
+
+      <div class="card stat-card">
+        <div>
+          <div class="card-sub">GENERALIZATION (OUT-OF-DISTRIBUTION)</div>
+          <div class="stat-value" id="generalization-value">—</div>
+          <div class="stat-caption" id="generalization-caption">the honest number, not the flattering one</div>
+        </div>
+        <div class="stat-icon">◇</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-nav">
+    <div class="footer-nav-item active"><span class="icon">▦</span>Dashboard</div>
+    <div class="footer-nav-item"><span class="icon">✓</span>Reconciliation</div>
+    <div class="footer-nav-item"><span class="icon">◇</span>Forecast</div>
+    <div class="footer-nav-item"><span class="icon">▤</span>Docs</div>
+  </div>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>

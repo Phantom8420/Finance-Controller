@@ -3,5 +3,6 @@ __pycache__/
 *.pyc
 .env
 data/fixtures/*.json
+frontend/data.json
 .pytest_cache/
 .streamlit/

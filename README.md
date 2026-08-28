@@ -18,11 +18,17 @@ find blind spots before a human does.
    aggregate. This checks the net drift across all verified records against
    a batch-scaled tolerance, using exact decimal arithmetic (and a `z3`
    constraint-solver check when installed).
-3. **The agent hunts its own blind spots.** After the real batch, it
-   generates its own adversarial edge cases designed to fool its own
-   matching logic (boundary rounding, chained partial refunds, wrong GST
-   slabs) and logs anything it can't resolve as a known limitation it
-   found on its own.
+3. **The agent hunts its own blind spots.** After the real batch, it runs
+   a developer-authored fuzz suite (boundary rounding, chained partial
+   refunds, wrong GST slabs) against its own matching logic, plus a
+   genuinely AI-generated adversarial suite when `ANTHROPIC_API_KEY` is
+   set, and logs anything it can't resolve as a known limitation.
+
+Two stretch goals beyond the three layers: a **settlement Q&A agent**
+(`app/qa_agent.py`, grounded only in Layer 1's proof records, never
+re-derives numbers itself) and a **cash forecast** (`app/forecast.py`, a
+settlement-timing projection with every assumption stated explicitly, not
+a revenue forecast).
 
 See [docs/architecture.md](docs/architecture.md) for the full design and
 [the buildathon plan](../.claude/plans/) for how this was scoped.
@@ -44,6 +50,20 @@ Razorpay test-mode data via `app/razorpay_client.py` once you have keys.
 Set `ANTHROPIC_API_KEY` to enable the Layer 1 stage-3 LLM-assisted proof
 step; without it, gaps the rule-based stages can't explain still correctly
 land in the exception list.
+
+## Custom frontend
+
+A static dashboard (`frontend/`) reads a JSON snapshot of a pipeline run
+and renders it — high-contrast black/white with a light-teal / dark-teal /
+orange accent palette, no framework, no build step.
+
+```bash
+python scripts/export_dashboard_data.py   # writes frontend/data.json
+python -m http.server 8502 --directory frontend
+```
+
+Then open `http://localhost:8502`. Re-run the export script any time to
+refresh the numbers; the page just re-fetches `data.json` on reload.
 
 ## Tests
 
