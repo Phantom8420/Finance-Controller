@@ -1,0 +1,158 @@
+{
+  "data_source": "mock",
+  "batch_size": 60,
+  "throughput": {
+    "records": 60,
+    "seconds": 0.0144,
+    "records_per_second": 4171.71
+  },
+  "scores": {
+    "total_records": 60,
+    "true_positives_exceptions_correctly_flagged": 9,
+    "false_positives_over_cautious": 0,
+    "false_negatives_wrongly_force_matched": 0,
+    "true_negatives_correctly_resolved": 51,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exception_rate": 0.15
+  },
+  "reverify": {
+    "chain_intact": true,
+    "all_math_ok": true,
+    "checked": 60
+  },
+  "conservation": {
+    "balanced": false,
+    "ledger_entries_compared": 61,
+    "net_drift_across_recorded_entries": "175.87",
+    "drift_tolerance": "1.22",
+    "amount_with_no_ledger_entry": "651.58",
+    "payments_with_no_ledger_entry": 2
+  },
+  "z3": {
+    "solver_result": "unsat",
+    "satisfiable": false,
+    "ledger_entries_compared": 61,
+    "amount_with_no_ledger_entry": "651.58"
+  },
+  "generalization": {
+    "fixed_suite_generated": 24,
+    "fixed_suite_resolved": 1,
+    "fixed_suite_resolution_rate": 0.0417
+  },
+  "forecast": {
+    "confirmed_settled_today": "11607.21",
+    "pending_amount": "0.00",
+    "pending_count": 0,
+    "at_risk_amount": "2294.86",
+    "at_risk_count": 9,
+    "assumptions": [
+      "Pending (unresolved, not flagged) amounts settle evenly over the next 2 day(s) \u2014 Razorpay's documented T+2 cycle.",
+      "\u20b92294.86 tied to 9 exception(s) is excluded from the projection entirely, not counted as incoming cash, until a human resolves it.",
+      "No future refunds/chargebacks are modeled beyond what's already in this batch \u2014 this is a settlement-timing projection of money already captured, not a revenue forecast."
+    ],
+    "timeline": [
+      {
+        "day": 0,
+        "projected_cash": "11607.21"
+      },
+      {
+        "day": 1,
+        "projected_cash": "11607.21"
+      },
+      {
+        "day": 2,
+        "projected_cash": "11607.21"
+      },
+      {
+        "day": 3,
+        "projected_cash": "11607.21"
+      },
+      {
+        "day": 4,
+        "projected_cash": "11607.21"
+      },
+      {
+        "day": 5,
+        "projected_cash": "11607.21"
+      },
+      {
+        "day": 6,
+        "projected_cash": "11607.21"
+      }
+    ]
+  },
+  "rule_type_breakdown": [
+    {
+      "label": "net_settlement",
+      "count": 42
+    },
+    {
+      "label": "exception",
+      "count": 9
+    },
+    {
+      "label": "gst_fee_miss",
+      "count": 8
+    },
+    {
+      "label": "refund_not_reflected",
+      "count": 1
+    }
+  ],
+  "exception_reason_breakdown": [
+    {
+      "label": "unexplained gap",
+      "count": 4,
+      "pct": 44.4
+    },
+    {
+      "label": "duplicate entry",
+      "count": 3,
+      "pct": 33.3
+    },
+    {
+      "label": "missing entry",
+      "count": 2,
+      "pct": 22.2
+    }
+  ],
+  "exceptions": [
+    {
+      "payment_id": "pay_0011",
+      "reason": "no rule or generated proof reproduces the ledger amount \u2014 flagged, not guessed"
+    },
+    {
+      "payment_id": "pay_0025",
+      "reason": "2 ledger entries reference the same payment \u2014 ambiguous, needs human review"
+    },
+    {
+      "payment_id": "pay_0038",
+      "reason": "2 ledger entries reference the same payment \u2014 ambiguous, needs human review"
+    },
+    {
+      "payment_id": "pay_0039",
+      "reason": "no rule or generated proof reproduces the ledger amount \u2014 flagged, not guessed"
+    },
+    {
+      "payment_id": "pay_0042",
+      "reason": "no rule or generated proof reproduces the ledger amount \u2014 flagged, not guessed"
+    },
+    {
+      "payment_id": "pay_0052",
+      "reason": "no ledger entry found for this payment"
+    },
+    {
+      "payment_id": "pay_0053",
+      "reason": "no ledger entry found for this payment"
+    },
+    {
+      "payment_id": "pay_0055",
+      "reason": "no rule or generated proof reproduces the ledger amount \u2014 flagged, not guessed"
+    },
+    {
+      "payment_id": "pay_0058",
+      "reason": "2 ledger entries reference the same payment \u2014 ambiguous, needs human review"
+    }
+  ]
+}
