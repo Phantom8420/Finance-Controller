@@ -114,7 +114,16 @@ def find_foreign_constants(code: str, allowed_values: set) -> list:
     return foreign
 
 
-def run_proof_code(code: str, inputs: dict, timeout: float = 2.0) -> Decimal:
+def run_proof_code(code: str, inputs: dict, timeout: float = 2.0, trusted: bool = False) -> Decimal:
+    """`trusted=True` skips the thread+timeout wrapper below — AST
+    validation still runs unconditionally either way. Only pass it for our
+    own fixed, developer-authored templates, whose termination and safety
+    we can vouch for directly, never for LLM-generated or otherwise
+    externally-influenced code. Re-verification (ProofChain.reverify_all,
+    scripts/verify_chain.py) never sets this: every stored proof, no
+    matter how it was originally resolved, is re-checked through the full
+    paranoid path on re-verification — this flag only speeds up the
+    initial resolution of known-safe rules, it never weakens the audit."""
     _validate_ast(code)
 
     restricted_globals = {
@@ -123,33 +132,45 @@ def run_proof_code(code: str, inputs: dict, timeout: float = 2.0) -> Decimal:
         "math": math,
     }
     local_ns: dict = {}
-    result_queue: "queue.Queue[tuple[str, object]]" = queue.Queue(maxsize=1)
 
-    def _run():
+    def _run_and_get():
+        exec(code, restricted_globals, local_ns)  # noqa: S102 - AST-validated + restricted globals above
+        if "compute" not in local_ns:
+            raise SandboxError("proof code must define a compute(inputs) function")
+        return local_ns["compute"](inputs)
+
+    if trusted:
         try:
-            exec(code, restricted_globals, local_ns)  # noqa: S102 - AST-validated + restricted globals above
-            if "compute" not in local_ns:
-                raise SandboxError("proof code must define a compute(inputs) function")
-            result_queue.put(("ok", local_ns["compute"](inputs)))
-        except Exception as e:  # noqa: BLE001 - reported to the caller below, never swallowed
-            result_queue.put(("error", e))
+            result = _run_and_get()
+        except SandboxError:
+            raise
+        except Exception as e:  # noqa: BLE001 - reported to the caller below
+            raise SandboxError(f"proof code raised {e!r}") from e
+    else:
+        result_queue: "queue.Queue[tuple[str, object]]" = queue.Queue(maxsize=1)
 
-    thread = threading.Thread(target=_run, daemon=True)
-    thread.start()
-    thread.join(timeout)
+        def _run():
+            try:
+                result_queue.put(("ok", _run_and_get()))
+            except Exception as e:  # noqa: BLE001 - reported to the caller below, never swallowed
+                result_queue.put(("error", e))
 
-    if thread.is_alive():
-        raise SandboxError(f"proof code exceeded {timeout}s timeout")
+        thread = threading.Thread(target=_run, daemon=True)
+        thread.start()
+        thread.join(timeout)
 
-    try:
-        status, payload = result_queue.get_nowait()
-    except queue.Empty as e:
-        raise SandboxError("proof code thread exited without producing a result") from e
+        if thread.is_alive():
+            raise SandboxError(f"proof code exceeded {timeout}s timeout")
 
-    if status == "error":
-        raise SandboxError(f"proof code raised {payload!r}") from payload
+        try:
+            status, payload = result_queue.get_nowait()
+        except queue.Empty as e:
+            raise SandboxError("proof code thread exited without producing a result") from e
 
-    result = payload
+        if status == "error":
+            raise SandboxError(f"proof code raised {payload!r}") from payload
+        result = payload
+
     if isinstance(result, Decimal):
         return result
     try:

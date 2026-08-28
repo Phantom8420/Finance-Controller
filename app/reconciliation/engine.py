@@ -182,7 +182,14 @@ def reconcile(payments: list[PaymentRecord], ledger: list[LedgerEntry]) -> list[
 
         for rule_type, code, confidence in _RULES:
             try:
-                computed = run_proof_code(code, inputs)
+                # trusted=True: these three templates are fixed strings we
+                # wrote ourselves (see _RULES above), never model- or
+                # externally-influenced — skips the thread+timeout wrapper
+                # sandbox.py uses for genuinely untrusted code. Stage 3
+                # below (model-generated) and re-verification both still
+                # go through the full path; this only speeds up resolving
+                # our own known-safe rules.
+                computed = run_proof_code(code, inputs, trusted=True)
             except SandboxError:
                 continue
             if abs(computed - entry.amount) <= TOLERANCE:
