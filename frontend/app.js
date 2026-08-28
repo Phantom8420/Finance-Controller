@@ -11,6 +11,20 @@ function colorForRule(label, rank) {
   return RULE_COLORS[Math.min(rank, RULE_COLORS.length - 1)];
 }
 
+// Scales the whole dashboard down to fit the viewport height exactly, so
+// it never needs page scrolling - recomputed on load, on resize, and
+// whenever a tab switch changes how tall the visible content is (a
+// fixed zoom value can't be right for every window size or every tab).
+function fitToViewport() {
+  const shell = document.querySelector(".shell");
+  shell.style.zoom = 1;
+  const bodyStyle = getComputedStyle(document.body);
+  const verticalPadding = parseFloat(bodyStyle.paddingTop) + parseFloat(bodyStyle.paddingBottom);
+  const available = window.innerHeight - verticalPadding - 8; // small safety margin
+  const needed = shell.scrollHeight;
+  shell.style.zoom = Math.min(1, available / needed).toFixed(3);
+}
+
 async function main() {
   const res = await fetch("data.json");
   if (!res.ok) {
@@ -45,6 +59,9 @@ function render(data) {
 
   initNav();
   initHeaderIcons(data);
+
+  fitToViewport();
+  window.addEventListener("resize", fitToViewport);
 }
 
 // ---------- Navigation: header tabs + footer nav both drive the same
@@ -60,6 +77,7 @@ function setActiveTab(name) {
   });
   const grid = document.querySelector(".grid");
   grid.style.gridTemplateColumns = visibleCount === 1 ? "1fr" : visibleCount === 2 ? "1.15fr 1fr" : "1.15fr 1fr 1fr";
+  fitToViewport();
 }
 
 function initNav() {

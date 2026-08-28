@@ -17,6 +17,11 @@
 
 * { box-sizing: border-box; }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -27,6 +32,8 @@ body {
 }
 
 .shell {
+  /* zoom factor is computed and set in app.js so it always fits the
+     actual viewport height, whatever that is - see fitToViewport() */
   max-width: 1400px;
   margin: 0 auto;
   border: 1.5px solid var(--line);
