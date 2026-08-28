@@ -78,8 +78,8 @@ correct verdict and never force-matches an unexplained gap.
 
 - Layers 1-3 implemented and verified end-to-end against mock data
   (60-record batch: precision 1.0, recall 1.0, exception rate 0.15,
-  ~1600 records/sec; conservation check correctly flags a systematic
-  ₹88.50 drift from GST-miscalculation-type ledger entries; self-test
-  generates 24 adversarial cases and honestly reports its blind spots).
+  ~3700 records/sec; conservation check correctly flags a systematic
+  ₹175.87 drift across recorded ledger entries; self-test generates 24
+  adversarial cases and honestly reports its blind spots).
 - Real Razorpay test-mode wiring (`app/razorpay_client.py`) is scaffolded
   but not yet exercised against live keys — pending signup.
