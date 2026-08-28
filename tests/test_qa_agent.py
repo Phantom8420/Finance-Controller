@@ -12,7 +12,7 @@ _NOW = datetime(2026, 8, 1, 9, 0, 0)
 
 @pytest.fixture(autouse=True)
 def _no_llm_calls(monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
 
 
 def _sample_proofs():

@@ -21,7 +21,7 @@ find blind spots before a human does.
 3. **The agent hunts its own blind spots.** After the real batch, it runs
    a developer-authored fuzz suite (boundary rounding, chained partial
    refunds, wrong GST slabs) against its own matching logic, plus a
-   genuinely AI-generated adversarial suite when `ANTHROPIC_API_KEY` is
+   genuinely AI-generated adversarial suite when `GEMINI_API_KEY` is
    set, and logs anything it can't resolve as a known limitation.
 
 Two stretch goals beyond the three layers: a **settlement Q&A agent**
@@ -47,7 +47,7 @@ streamlit run app/dashboard/streamlit_app.py
 Works out of the box with mock payment data (`data/mock_source.py`) if
 `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` aren't set yet — swap in real
 Razorpay test-mode data via `app/razorpay_client.py` once you have keys.
-Set `ANTHROPIC_API_KEY` to enable the Layer 1 stage-3 LLM-assisted proof
+Set `GEMINI_API_KEY` to enable the Layer 1 stage-3 LLM-assisted proof
 step; without it, gaps the rule-based stages can't explain still correctly
 land in the exception list.
 

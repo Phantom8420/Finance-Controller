@@ -12,7 +12,7 @@ _NOW = datetime(2026, 8, 1, 9, 0, 0)
 @pytest.fixture(autouse=True)
 def _no_llm_calls(monkeypatch):
     # Keep the test suite deterministic and offline regardless of local .env
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
 
 
 def _payment(payment_id: str = "pay_1", amount: str = "500.00", refund: str = "0") -> PaymentRecord:

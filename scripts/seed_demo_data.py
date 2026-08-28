@@ -70,12 +70,12 @@ def main(n: int = 60) -> None:
     fixed_suite = run_fixed_suite()
     print(json.dumps(fixed_suite, indent=2))
 
-    print("\n=== Layer 3b: AI-generated adversarial suite (only if ANTHROPIC_API_KEY set) ===")
+    print("\n=== Layer 3b: AI-generated adversarial suite (only if GEMINI_API_KEY set) ===")
     llm_suite = run_llm_suite()
     if llm_suite is not None:
         print(json.dumps(llm_suite, indent=2))
     else:
-        print("(no ANTHROPIC_API_KEY configured — skipped)")
+        print("(no GEMINI_API_KEY configured — skipped)")
 
     print("\n=== Generalization — OUT-OF-DISTRIBUTION (the honest number) ===")
     print(json.dumps(generalization_report(fixed_suite, llm_suite), indent=2))

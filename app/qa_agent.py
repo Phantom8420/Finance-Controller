@@ -3,14 +3,14 @@ outcomes, grounded only in the proof records Layer 1 already computed.
 The model is never asked to re-derive a number itself here; it's shown
 the actual ProofRecord data and told to cite it, or say plainly that the
 data doesn't cover the question, rather than invent an answer. Requires
-ANTHROPIC_API_KEY — returns a clear "not configured" result otherwise,
-same "skipped, not faked" pattern as the rest of the app.
+GEMINI_API_KEY — returns a clear "not configured" result otherwise, same
+"skipped, not faked" pattern as the rest of the app.
 """
 from __future__ import annotations
 
-import os
 import re
 
+from app.llm_client import generate_text, has_api_key
 from app.reconciliation.models import FEE_RATE, GST_RATE, LedgerEntry, PaymentRecord, ProofRecord
 
 _ID_PATTERN = re.compile(r"\b(?:pay|fuzz)_[a-zA-Z0-9_]+\b")
@@ -55,21 +55,12 @@ def answer_question(
     ledger: list[LedgerEntry],
     proofs: list[ProofRecord],
 ) -> dict:
-    if not os.environ.get("ANTHROPIC_API_KEY"):
+    if not has_api_key():
         return {
             "answered": False,
             "answer": None,
             "grounded_in": [],
-            "reason": "ANTHROPIC_API_KEY not configured — skipped, not faked.",
-        }
-    try:
-        import anthropic
-    except ImportError:
-        return {
-            "answered": False,
-            "answer": None,
-            "grounded_in": [],
-            "reason": "anthropic package not installed.",
+            "reason": "GEMINI_API_KEY not configured — skipped, not faked.",
         }
 
     payments_by_id = {p.payment_id: p for p in payments}
@@ -87,21 +78,13 @@ def answer_question(
         f"Question: {question}"
     )
 
-    try:
-        client = anthropic.Anthropic()
-        model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
-        response = client.messages.create(
-            model=model,
-            max_tokens=500,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        answer = response.content[0].text
-    except Exception as e:
+    answer = generate_text(prompt, max_output_tokens=500)
+    if answer is None:
         return {
             "answered": False,
             "answer": None,
             "grounded_in": [r["payment_id"] for r in context_records],
-            "reason": f"model call failed: {e!r}",
+            "reason": "model call failed or returned no answer",
         }
 
     return {

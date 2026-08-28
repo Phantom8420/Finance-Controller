@@ -7,23 +7,23 @@ Three stages, in order:
      ledger amount from a known formula (net settlement, GST-on-fee miss,
      unreflected refund) and is executed in the sandbox — accepted only if
      it reproduces the actual number
-  3. LLM-assisted proof: only for gaps stage 2 can't explain, Claude is asked
-     to *write* a compute() script; it is accepted only if executing it
-     reproduces the actual ledger amount, never on the model's say-so alone.
-     The model is never shown the target ledger amount — only the raw
-     inputs — and the generated code is statically checked for hardcoded
-     constants before it's trusted, so it can't game the check by just
-     returning the answer it was told to reproduce.
+  3. LLM-assisted proof: only for gaps stage 2 can't explain, Gemini is
+     asked to *write* a compute() script; it is accepted only if executing
+     it reproduces the actual ledger amount, never on the model's say-so
+     alone. The model is never shown the target ledger amount — only the
+     raw inputs — and the generated code is statically checked for
+     hardcoded constants before it's trusted, so it can't game the check
+     by just returning the answer it was told to reproduce.
 
 Anything that doesn't reproduce the number by any stage goes to the
 exception list — the engine never force-matches.
 """
 from __future__ import annotations
 
-import os
 from decimal import Decimal
 from typing import Optional
 
+from app.llm_client import generate_text, strip_code_fences
 from app.reconciliation.models import FEE_RATE, GST_RATE, TOLERANCE, LedgerEntry, PaymentRecord, ProofRecord
 from app.reconciliation.sandbox import SandboxError, find_foreign_constants, run_proof_code
 
@@ -76,16 +76,9 @@ def _inputs_for(payment: PaymentRecord) -> dict:
 def _try_llm_proof(payment: PaymentRecord, entry: LedgerEntry) -> Optional[tuple]:
     """Returns (code, computed_value) only if the model-generated script
     genuinely reproduces the actual ledger amount when executed. Returns
-    None if no ANTHROPIC_API_KEY is configured, or the model's attempt
+    None if no GEMINI_API_KEY is configured, or the model's attempt
     doesn't reproduce the number — either way, that's an honest exception,
     not a guess."""
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        return None
-    try:
-        import anthropic
-    except ImportError:
-        return None
-
     inputs = _inputs_for(payment)
     # Deliberately NOT shown the actual ledger amount: if the model knew the
     # target, it could just hardcode `return Decimal("<target>")` and
@@ -107,17 +100,10 @@ def _try_llm_proof(payment: PaymentRecord, entry: LedgerEntry) -> Optional[tuple
         f"inputs = {inputs}\n\n"
         "Output only the function definition, nothing else."
     )
-    try:
-        client = anthropic.Anthropic()
-        model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
-        response = client.messages.create(
-            model=model,
-            max_tokens=400,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        code = response.content[0].text
-    except Exception:
+    raw = generate_text(prompt)
+    if raw is None:
         return None
+    code = strip_code_fences(raw)
 
     # Static anti-gaming check: reject any numeric literal not traceable to
     # the inputs the model was actually given (plus ordinary percentage

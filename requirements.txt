@@ -1,5 +1,5 @@
 razorpay>=1.4.1
-anthropic>=0.40.0
+google-genai>=1.0.0
 pydantic>=2.7
 streamlit>=1.38
 python-dotenv>=1.0

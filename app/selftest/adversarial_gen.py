@@ -9,12 +9,12 @@ Two distinct, honestly-labeled sources of adversarial cases:
     is *not* the system inventing its own tests — it's a fixed suite the
     system runs against itself every time.
 
-  - `run_llm_suite()` — genuinely AI-generated cases: when
-    ANTHROPIC_API_KEY is set, Claude is asked to invent a plausible
-    bookkeeping mistake and write the code that produces it, executed in
-    the same sandbox as everything else in Layer 1. This is the part that
-    's actually autonomous; it's additive to the fixed suite, not a
-    replacement, and returns None when no key is configured.
+  - `run_llm_suite()` — genuinely AI-generated cases: when GEMINI_API_KEY
+    is set, Gemini is asked to invent a plausible bookkeeping mistake and
+    write the code that produces it, executed in the same sandbox as
+    everything else in Layer 1. This is the part that's actually
+    autonomous; it's additive to the fixed suite, not a replacement, and
+    returns None when no key is configured.
 
 Both feed the same `reconcile()` engine used on real data. Anything that
 can't be resolved is logged as a known limitation — found before a human
@@ -22,12 +22,12 @@ hit it, whichever suite found it.
 """
 from __future__ import annotations
 
-import os
 import random
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Callable, Optional
 
+from app.llm_client import generate_text, has_api_key, strip_code_fences
 from app.reconciliation.engine import reconcile
 from app.reconciliation.models import FEE_RATE, GST_RATE, LedgerEntry, PaymentRecord
 from app.reconciliation.sandbox import SandboxError, find_foreign_constants, run_proof_code
@@ -139,7 +139,7 @@ def run_fixed_suite(n_per_generator: int = 8, seed: int = 99) -> dict:
 run_self_test = run_fixed_suite
 
 
-def _llm_case(rng: random.Random, i: int, client, model: str) -> Optional[tuple[PaymentRecord, LedgerEntry]]:
+def _llm_case(rng: random.Random, i: int) -> Optional[tuple[PaymentRecord, LedgerEntry]]:
     amount = (Decimal(rng.randint(1000, 99999)) / Decimal(100)).quantize(Decimal("0.01"))
     payment = PaymentRecord(
         payment_id=f"fuzz_llm_{i}",
@@ -165,11 +165,10 @@ def _llm_case(rng: random.Random, i: int, client, model: str) -> Optional[tuple[
         f"inputs = {inputs}\n\n"
         "Output only the function definition, nothing else."
     )
-    try:
-        response = client.messages.create(model=model, max_tokens=400, messages=[{"role": "user", "content": prompt}])
-        code = response.content[0].text
-    except Exception:
+    raw = generate_text(prompt)
+    if raw is None:
         return None
+    code = strip_code_fences(raw)
 
     allowed = set(inputs.values()) | {"0", "1", "2", "10", "100", "0.01"}
     if find_foreign_constants(code, allowed):
@@ -192,23 +191,17 @@ def _llm_case(rng: random.Random, i: int, client, model: str) -> Optional[tuple[
 
 def run_llm_suite(n: int = 6, seed: int = 123) -> Optional[dict]:
     """Genuinely AI-generated adversarial cases. Returns None if
-    ANTHROPIC_API_KEY isn't configured — additive to run_fixed_suite(),
+    GEMINI_API_KEY isn't configured — additive to run_fixed_suite(),
     never a silent replacement for it."""
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        return None
-    try:
-        import anthropic
-    except ImportError:
+    if not has_api_key():
         return None
 
-    client = anthropic.Anthropic()
-    model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
     rng = random.Random(seed)
 
     payments: list[PaymentRecord] = []
     ledger: list[LedgerEntry] = []
     for i in range(n):
-        result = _llm_case(rng, i, client, model)
+        result = _llm_case(rng, i)
         if result is None:
             continue
         payment, entry = result

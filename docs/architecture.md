@@ -51,13 +51,13 @@ what a correct ledger entry for that payment should say.
    `app/reconciliation/sandbox.py`. A rule is accepted only if its output
    reproduces the actual ledger amount within tolerance (`TOLERANCE =
    0.02`, i.e. 2 paise).
-3. **LLM-assisted proof.** Only for gaps stage 2 can't explain, Claude is
+3. **LLM-assisted proof.** Only for gaps stage 2 can't explain, Gemini is
    asked to write a `compute()` script — deliberately never shown the
    target ledger amount, only the raw inputs, so it can't just hardcode
    the answer. The generated code is additionally statically checked
    (`find_foreign_constants`) to reject any numeric literal not traceable
    to those inputs, and only accepted if *executing* it reproduces the
-   actual number. If `ANTHROPIC_API_KEY` isn't set, this stage is skipped
+   actual number. If `GEMINI_API_KEY` isn't set, this stage is skipped
    and the gap correctly falls through to the exception list instead.
 
 `app/reconciliation/proof_chain.py` hashes each `ProofRecord` (payload +
@@ -106,7 +106,7 @@ engine used on real data:
   always on, no API key needed. This is *not* the system inventing its
   own tests — it's a fixed suite the system runs against itself.
 - **`run_llm_suite()`** — genuinely AI-generated cases: when
-  `ANTHROPIC_API_KEY` is set, Claude invents its own plausible bookkeeping
+  `GEMINI_API_KEY` is set, Gemini invents its own plausible bookkeeping
   mistake and writes the code that produces it (same anti-gaming
   constant check as Stage 3), executed in the same sandbox. Additive to
   the fixed suite, never a silent replacement.
@@ -126,7 +126,7 @@ tuned against.
 `app/qa_agent.py` answers questions about specific reconciliation
 outcomes grounded only in the `ProofRecord`s Layer 1 already computed —
 it never re-derives a number itself, and cites which record(s) it used.
-Requires `ANTHROPIC_API_KEY`; returns a clear "not configured" result
+Requires `GEMINI_API_KEY`; returns a clear "not configured" result
 otherwise, the same skipped-not-faked pattern as Layer 3b.
 
 `app/forecast.py` projects near-term cash position from Layer 1's

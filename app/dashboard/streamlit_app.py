@@ -172,10 +172,10 @@ with tab4:
     fixed_suite = run_fixed_suite()
 
     st.subheader("AI-generated adversarial suite")
-    st.caption("Claude invents its own bookkeeping-mistake scenarios — requires ANTHROPIC_API_KEY.")
+    st.caption("Gemini invents its own bookkeeping-mistake scenarios — requires GEMINI_API_KEY.")
     llm_suite = run_llm_suite()
     if llm_suite is None:
-        st.info("No ANTHROPIC_API_KEY configured — this suite is skipped, not faked.")
+        st.info("No GEMINI_API_KEY configured — this suite is skipped, not faked.")
 
     report = generalization_report(fixed_suite, llm_suite)
     st.json(report)
@@ -191,7 +191,7 @@ with tab5:
     st.subheader("Ask the ledger")
     st.caption(
         "Grounded only in the proof records already computed above — never re-derives a number "
-        "itself, cites exactly which record(s) it used. Requires ANTHROPIC_API_KEY."
+        "itself, cites exactly which record(s) it used. Requires GEMINI_API_KEY."
     )
     question = st.text_input("Ask about a specific payment (e.g. \"why didn't pay_0011 settle?\") or the batch in general")
     if st.button("Ask") and question:
