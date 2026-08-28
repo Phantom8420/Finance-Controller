@@ -45,7 +45,7 @@ class LedgerEntry(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     entry_id: str
-    ref_payment_id: Optional[str]
+    ref_payment_id: Optional[str] = None
     amount: Decimal
     recorded_at: datetime
     note: str = ""
