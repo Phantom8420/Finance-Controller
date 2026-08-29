@@ -3,8 +3,8 @@
   "batch_size": 60,
   "throughput": {
     "records": 60,
-    "seconds": 0.0144,
-    "records_per_second": 4171.71
+    "seconds": 0.0162,
+    "records_per_second": 3708.58
   },
   "scores": {
     "total_records": 60,

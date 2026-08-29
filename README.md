@@ -51,19 +51,36 @@ Set `GEMINI_API_KEY` to enable the Layer 1 stage-3 LLM-assisted proof
 step; without it, gaps the rule-based stages can't explain still correctly
 land in the exception list.
 
-## Custom frontend
+## The dashboard
 
-A static dashboard (`frontend/`) reads a JSON snapshot of a pipeline run
-and renders it — high-contrast black/white with a light-teal / dark-teal /
-orange accent palette, no framework, no build step.
+The visual design lives in `frontend/{index.html,styles.css,app.js}` —
+high-contrast black/white with a light-teal / dark-teal / orange accent
+palette, no framework, no build step. `streamlit run` is how you actually
+view it: the sidebar's "Run pipeline" button runs a real batch through
+Layers 1-3, and the result is injected live into that same HTML, rendered
+inline via `st.components.v1.html()` (`app/embedded_dashboard.py`) — one
+design, fed by a real run every time, not a stale snapshot.
+
+`frontend/app.js` also still supports a standalone mode (`fetch("data.json")`
+if `window.__DASHBOARD_DATA__` isn't present), useful for quickly
+inspecting one saved snapshot without spinning up Streamlit:
 
 ```bash
 python scripts/export_dashboard_data.py   # writes frontend/data.json
 python -m http.server 8502 --directory frontend
 ```
 
-Then open `http://localhost:8502`. Re-run the export script any time to
-refresh the numbers; the page just re-fetches `data.json` on reload.
+## Deploy to Streamlit Community Cloud
+
+1. Push this repo to GitHub (already done — it's public).
+2. At [share.streamlit.io](https://share.streamlit.io), New app → pick this
+   repo → branch `master` → main file path `app/dashboard/streamlit_app.py`.
+3. In the app's **Settings → Secrets**, paste the same keys as
+   `.streamlit/secrets.toml.example` (with real values). Streamlit Cloud
+   injects every key there into `os.environ` automatically, so no code
+   path differs between local and deployed.
+4. Deploy. `.streamlit/config.toml` (committed, not secret) sets the
+   black/teal theme automatically — no extra setup.
 
 ## Tests
 

@@ -32,7 +32,13 @@ Source A (real, ground truth)          Source B (messy, the merchant's books)
       over Layer 1's proofs)                projection, not a forecast)
                                  |
                                  v
-        app/metrics.py + app/dashboard/streamlit_app.py + frontend/
+      app/dashboard_data.py (build_payload — one shared payload,
+        used by both the CLI export script and the live dashboard)
+                                 |
+                                 v
+   app/dashboard/streamlit_app.py — sidebar drives a real run, results
+   injected live into frontend/{index.html,styles.css,app.js} via
+   app/embedded_dashboard.py + st.components.v1.html()
 ```
 
 ## Layer 1 — per-record proof, not prose
@@ -135,6 +141,24 @@ cycle, with every assumption returned in the output rather than baked in
 silently; amounts tied to exceptions are excluded from the projection
 entirely rather than counted as incoming cash. Pure arithmetic — no API
 key needed, always available.
+
+## The dashboard: one design, live data
+
+`frontend/{index.html,styles.css,app.js}` is the canonical design — a
+static, framework-free HTML/CSS/JS dashboard (black/white with a
+light-teal/dark-teal/orange accent palette). It was originally built to be
+served standalone (`app.js` still supports that: `fetch("data.json")` if
+`window.__DASHBOARD_DATA__` isn't present), but the primary path now is
+`app/dashboard/streamlit_app.py`: the sidebar's "Run pipeline" runs a real
+batch through Layers 1-3, `app/dashboard_data.build_payload()` turns the
+results into one JSON-shaped dict, and `app/embedded_dashboard.py` inlines
+that data straight into the same HTML/CSS/JS and renders it inside
+Streamlit via `st.components.v1.html()`. One set of design files, fed a
+real run every time — not a design duplicated in two places, and not a
+pre-generated snapshot that can silently go stale (which is exactly what
+happened once already: the standalone deploy shipped with no data.json in
+the repo at all, since it was gitignored for local-dev reasons that didn't
+account for what a deploy actually needs).
 
 ## Sandbox: trust-tiered execution
 
