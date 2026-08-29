@@ -4,4 +4,4 @@ __pycache__/
 .env
 data/fixtures/*.json
 .pytest_cache/
-.streamlit/
+.streamlit/secrets.toml
