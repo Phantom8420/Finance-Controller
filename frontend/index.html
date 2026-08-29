@@ -10,24 +10,23 @@
 <div class="shell">
 
   <div class="header">
-    <div>
-      <div class="brand-row">
-        <div class="brand-mark">🧾</div>
-        <div class="brand-text">
-          <div class="title">AI Finance Controller</div>
-          <div class="subtitle" id="subtitle">Loading batch…</div>
-        </div>
-      </div>
-      <div class="tabs">
-        <div class="tab active" data-target="dashboard">Dashboard</div>
-        <div class="tab" data-target="reconciliation">Reconciliation</div>
-        <div class="tab" data-target="forecast">Forecast</div>
+    <div class="brand-row">
+      <div class="brand-mark">🧾</div>
+      <div class="brand-text">
+        <div class="title">AI Finance Controller</div>
+        <div class="subtitle" id="subtitle">Loading batch…</div>
       </div>
     </div>
     <div class="header-icons" style="position:relative;">
-      <button class="icon-btn" id="search-btn" title="Search exceptions by payment id">⌕</button>
-      <button class="icon-btn" id="flag-btn" title="Jump to exceptions">⚑</button>
-      <button class="icon-btn" id="settings-btn" title="Batch info">⚙</button>
+      <button class="icon-btn" id="search-btn" title="Search exceptions by payment id">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </button>
+      <button class="icon-btn" id="flag-btn" title="Jump to exceptions">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+      </button>
+      <button class="icon-btn" id="settings-btn" title="Batch info">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
       <input id="search-input" type="text" placeholder="pay_00…" style="display:none;position:absolute;top:40px;right:0;background:#000;border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:6px 10px;font-size:12px;width:140px;" />
       <div id="settings-panel" style="display:none;position:absolute;top:40px;right:0;background:#000;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:12px;width:200px;z-index:5;"></div>
     </div>
@@ -138,12 +137,24 @@
 
   </div>
 
-  <div class="footer-nav">
-    <div class="footer-nav-item active" data-target="dashboard"><span class="icon">▦</span>Dashboard</div>
-    <div class="footer-nav-item" data-target="reconciliation"><span class="icon">✓</span>Reconciliation</div>
-    <div class="footer-nav-item" data-target="forecast"><span class="icon">◇</span>Forecast</div>
-    <a class="footer-nav-item" href="https://github.com/Specter842/razorpay-finance-controller#readme" target="_blank" rel="noopener" style="text-decoration:none;"><span class="icon">▤</span>Docs</a>
-  </div>
+  <nav class="footer-nav">
+    <div class="footer-nav-item active" data-target="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+      <span>Dashboard</span>
+    </div>
+    <div class="footer-nav-item" data-target="reconciliation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"></path><path d="M9 12l2 2 4-4"></path></svg>
+      <span>Reconciliation</span>
+    </div>
+    <div class="footer-nav-item" data-target="forecast">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"></polyline><polyline points="15 7 21 7 21 13"></polyline></svg>
+      <span>Forecast</span>
+    </div>
+    <a class="footer-nav-item" href="https://github.com/Specter842/razorpay-finance-controller#readme" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="15" y2="17"></line></svg>
+      <span>Docs</span>
+    </a>
+  </nav>
 
 </div>
 <script src="app.js"></script>

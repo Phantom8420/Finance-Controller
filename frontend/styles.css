@@ -66,12 +66,10 @@ body {
 .icon-btn {
   width: 34px; height: 34px; border-radius: 50%;
   border: 1px solid var(--line-dim); display: flex; align-items: center; justify-content: center;
-  color: var(--fg); font-size: 14px; background: transparent; cursor: pointer;
+  color: var(--muted); background: transparent; cursor: pointer;
 }
-
-.tabs { display: flex; gap: 26px; margin-top: 4px; }
-.tab { color: var(--muted); font-size: 13.5px; padding-bottom: 6px; cursor: pointer; }
-.tab.active { color: var(--fg); font-weight: 600; border-bottom: 2px solid var(--teal); }
+.icon-btn:hover { color: var(--fg); border-color: var(--line); }
+.icon-btn svg { width: 16px; height: 16px; }
 
 /* ---------- Grid ---------- */
 .grid {
@@ -172,11 +170,23 @@ body {
 .stat-tag { font-size: 10.5px; border: 1px solid var(--line-dim); border-radius: 6px; padding: 2px 6px; color: var(--muted); }
 .stat-icon { font-size: 20px; }
 
-/* ---------- Footer nav ---------- */
+/* ---------- Footer nav: sleek floating pill dock ---------- */
 .footer-nav {
-  display: flex; justify-content: center; gap: 60px;
-  border-top: 1px solid var(--line-dim); margin-top: 20px; padding-top: 14px;
+  display: flex; justify-content: center; align-items: center; gap: 2px;
+  width: fit-content; margin: 24px auto 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line-dim);
+  border-radius: 999px;
+  padding: 6px;
 }
-.footer-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--muted); font-size: 10.5px; }
-.footer-nav-item.active { color: var(--fg); }
-.footer-nav-item .icon { font-size: 16px; }
+.footer-nav-item {
+  display: flex; align-items: center; gap: 7px;
+  color: var(--muted); font-size: 12.5px; font-weight: 500;
+  text-decoration: none; cursor: pointer;
+  padding: 9px 16px; border-radius: 999px;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+.footer-nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+.footer-nav-item:hover:not(.active) { background: rgba(255, 255, 255, 0.06); color: var(--fg); }
+.footer-nav-item.active { color: var(--bg); background: var(--teal); font-weight: 600; }
