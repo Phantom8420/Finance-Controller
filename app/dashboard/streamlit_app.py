@@ -22,7 +22,7 @@ load_dotenv()
 
 from app import razorpay_client
 from app.dashboard_data import build_payload
-from app.embedded_dashboard import build_embedded_html
+from app.embedded_dashboard import build_embedded_html, build_empty_state_html
 from app.metrics import measure_throughput
 from app.reconciliation.proof_chain import ProofChain
 from data.generate_ledger import generate_ledger
@@ -68,9 +68,7 @@ if run_clicked:
     st.session_state.payload = payload
 
 if st.session_state.payload is None:
-    st.title("AI Finance Controller")
-    st.caption("Prove it, balance it, break it — Razorpay AI Buildathon, Track 04")
-    st.info("Click **Run pipeline** in the sidebar to reconcile a batch.")
+    components.html(build_empty_state_html(), height=400)
     st.stop()
 
 components.html(build_embedded_html(st.session_state.payload), height=950, scrolling=True)

@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 
 from app.dashboard_data import build_payload
-from app.embedded_dashboard import build_embedded_html
+from app.embedded_dashboard import build_embedded_html, build_empty_state_html
 from app.reconciliation.engine import reconcile
 from app.reconciliation.models import LedgerEntry, PaymentRecord
 from app.reconciliation.proof_chain import ProofChain
@@ -83,3 +83,11 @@ def test_build_embedded_html_inlines_css_and_injects_data():
     assert "window.__DASHBOARD_DATA__" in html
     assert '<script src="app.js">' not in html  # inlined, not a broken external reference
     assert "pay_0002" in html  # real data actually made it into the page
+
+
+def test_empty_state_shares_the_same_design_language():
+    html = build_empty_state_html()
+    assert "<style>" in html
+    assert 'class="shell"' in html  # same shell/card classes as the real dashboard
+    assert 'class="card"' in html
+    assert "Run pipeline" in html
