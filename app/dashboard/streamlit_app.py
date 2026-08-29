@@ -22,7 +22,13 @@ load_dotenv()
 
 from app import razorpay_client
 from app.dashboard_data import build_payload
-from app.embedded_dashboard import build_embedded_html, build_empty_state_html
+from app.embedded_dashboard import (
+    build_embedded_html,
+    build_empty_state_html,
+    build_sidebar_brand_html,
+    build_sidebar_css,
+    build_sidebar_status_html,
+)
 from app.metrics import measure_throughput
 from app.reconciliation.proof_chain import ProofChain
 from data.generate_ledger import generate_ledger
@@ -32,9 +38,11 @@ FIXTURES_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "fixture
 
 st.set_page_config(page_title="AI Finance Controller", layout="wide")
 
+st.markdown(build_sidebar_css(), unsafe_allow_html=True)
+st.sidebar.markdown(build_sidebar_brand_html(), unsafe_allow_html=True)
+
 n = st.sidebar.slider("Batch size", 20, 200, 60, step=10)
-run_clicked = st.sidebar.button("Run pipeline", type="primary")
-st.sidebar.caption("Prove it, balance it, break it — Track 04")
+run_clicked = st.sidebar.button("Run pipeline", type="primary", use_container_width=True)
 
 if "payload" not in st.session_state:
     st.session_state.payload = None
@@ -70,5 +78,12 @@ if run_clicked:
 if st.session_state.payload is None:
     components.html(build_empty_state_html(), height=400)
     st.stop()
+
+st.sidebar.markdown(
+    build_sidebar_status_html(
+        st.session_state.payload["data_source"], st.session_state.payload["batch_size"]
+    ),
+    unsafe_allow_html=True,
+)
 
 components.html(build_embedded_html(st.session_state.payload), height=950, scrolling=True)
