@@ -88,8 +88,17 @@ def find_foreign_constants(code: str, allowed_values: set) -> list:
     `allowed_values` should include every raw input value plus 0/1/2/10/100
     for ordinary percentage arithmetic; callers pass those in explicitly.
     Only numeric constants are considered — ordinary string constants
-    (dict keys like "amount", "fee_rate") are never flagged."""
-    tree = ast.parse(code, mode="exec")
+    (dict keys like "amount", "fee_rate") are never flagged. Code that
+    doesn't even parse (a real failure mode — Gemini generates
+    inconsistently-indented code often enough to hit in production, not
+    just in theory) is treated as maximally suspicious: returns a
+    non-empty sentinel so every call site's `if foreign: reject` naturally
+    rejects it too, instead of the SyntaxError propagating up and
+    crashing the caller."""
+    try:
+        tree = ast.parse(code, mode="exec")
+    except SyntaxError:
+        return ["<code did not parse>"]
     allowed_decimals = {Decimal(v) for v in allowed_values if _is_decimal_like(v)}
 
     foreign = []

@@ -92,6 +92,14 @@ def compute(inputs):
         run_proof_code(code, {}, timeout=0.2)
 
 
+def test_find_foreign_constants_handles_unparseable_code_gracefully():
+    # real failure mode: Gemini generates inconsistently-indented code
+    # often enough to hit in production. Must not crash the caller.
+    bad_code = "def compute(inputs):\n  x = 1\n     y = 2\n  return x + y"
+    foreign = find_foreign_constants(bad_code, {"1", "2"})
+    assert foreign  # non-empty -> every call site's `if foreign: reject` still works
+
+
 def test_find_foreign_constants_flags_hardcoded_answer():
     # a script that just returns the "target" value it was shown, instead
     # of deriving anything from the inputs it was actually given
