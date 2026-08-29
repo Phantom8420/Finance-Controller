@@ -26,6 +26,13 @@ function fitToViewport() {
 }
 
 async function main() {
+  // Embedded mode (inside Streamlit): data is injected directly, no fetch
+  // needed or possible from a sandboxed srcdoc iframe.
+  if (window.__DASHBOARD_DATA__) {
+    render(window.__DASHBOARD_DATA__);
+    return;
+  }
+  // Standalone mode: served as static files, data.json sits alongside.
   const res = await fetch("data.json");
   if (!res.ok) {
     document.getElementById("subtitle").textContent =
