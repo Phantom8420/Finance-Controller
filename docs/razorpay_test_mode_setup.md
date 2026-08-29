@@ -1,9 +1,10 @@
 # Getting real Razorpay test-mode data into this project
 
-`app/razorpay_client.py` automates as much of this as Razorpay's APIs
-allow — but turning a created order into a *captured payment* is not
-fully API-automatable, and earlier project material implied otherwise.
-Here's exactly what's automated and what isn't.
+This is the actual, verified recipe — walked through end-to-end for a real
+6-payment batch (₹14,343 total), not a theoretical one. Earlier drafts of
+this doc guessed at a Postman-based approach and recommended a test card
+that turned out to be wrong; both are corrected below based on what
+actually worked.
 
 ## 1. Get test-mode keys
 
@@ -18,34 +19,57 @@ Here's exactly what's automated and what isn't.
    RAZORPAY_KEY_SECRET=...
    ```
 
-## 2. Seed orders (automated)
+## 2. Create Payment Links (automated, no dashboard login needed)
 
-```bash
-python -c "from app.razorpay_client import seed_test_orders; print(seed_test_orders(60))"
+Razorpay doesn't offer an API to programmatically "pay" — capture must go
+through Checkout, since that's the same code path that would move real
+money in production. **Payment Links** are the practical way in: create
+them via the API with your existing keys, no dashboard session required,
+each one gives a hosted Checkout URL you (or anyone) can pay from a
+browser:
+
+```python
+from app.razorpay_client import get_client
+
+client = get_client()
+link = client.payment_link.create({
+    "amount": 50000,  # paise
+    "currency": "INR",
+    "description": "Test payment",
+    "customer": {"name": "Test Customer", "contact": "+919876543210", "email": "test@example.com"},
+    "notify": {"sms": False, "email": False},
+    "reminder_enable": False,
+})
+print(link["short_url"])
 ```
 
-This creates 60 test-mode Orders via the API. This part is fully
-automated — no manual step.
+## 3. Complete Checkout with a *domestic* test card
 
-## 3. Turn orders into captured payments (semi-manual)
+Open the `short_url` and pay. Two real gotchas hit while doing this:
 
-Razorpay does not offer an API to programmatically "pay" an order in test
-mode — payment capture requires going through Checkout (or a webhook
-simulation), because that's the same code path that would move real money
-in production. Two practical options:
+- **The generic `4111 1111 1111 1111` Visa test number fails** with
+  "International cards are not supported" — Razorpay India's test mode
+  specifically wants a domestic card. Use the documented domestic
+  Mastercard instead: **`5267 3181 8797 5449`**, any future expiry, any
+  3-digit CVV.
+- **Contact verification is mandatory even with `customer` pre-filled** —
+  Checkout still prompts for a mobile number. Any correctly-formatted
+  10-digit Indian mobile number works; `9123456780` is confirmed working.
+- After the card, an **Axis Bank OTP simulation screen** appears — enter
+  `1221` (Razorpay's standard test OTP) and continue.
+- A "Save your card" bottom sheet may appear once or twice — dismiss it
+  ("Maybe later" / the X) and click Continue again; it doesn't block the
+  payment.
+- The UI doesn't always render the final "PAID" confirmation screen
+  reliably. **Don't trust the UI alone** — verify via the API:
+  ```python
+  link = client.payment_link.fetch("plink_...")
+  print(link["status"], link["amount_paid"])  # "paid", amount in paise
+  ```
 
-- **Checkout, using Razorpay's documented test cards** — open Razorpay's
-  [Checkout test flow](https://razorpay.com/docs/payments/payments/test-card-upi-details/)
-  for each order, pay with a test card (e.g. `4111 1111 1111 1111`, any
-  future expiry, any CVV). Tedious for 60 orders by hand — realistically
-  you'd script a headless browser against Checkout, which is out of scope
-  for this repo right now.
-- **Razorpay's Postman/test-mode payment simulation** — Razorpay publishes
-  a Postman collection that can create+capture a payment against a test
-  order in one call, bypassing Checkout's UI. This is the more practical
-  path for generating a real batch quickly; see Razorpay's API reference
-  for the current endpoint, since test-mode simulation endpoints have
-  moved before.
+This is manual-per-payment (no bulk automation built here yet) — realistic
+for a handful of payments to prove the pipeline against real data, not
+for hundreds.
 
 ## 4. Pull the data
 
