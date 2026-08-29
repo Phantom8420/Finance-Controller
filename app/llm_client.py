@@ -13,7 +13,7 @@ import os
 import re
 from typing import Optional
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-3.6-flash"
 
 _LEADING_FENCE = re.compile(r"^```[a-zA-Z]*\s*\n")
 _TRAILING_FENCE = re.compile(r"\n```\s*$")
