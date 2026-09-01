@@ -27,33 +27,40 @@ from app.llm_client import generate_text, strip_code_fences
 from app.reconciliation.models import FEE_RATE, GST_RATE, TOLERANCE, LedgerEntry, PaymentRecord, ProofRecord
 from app.reconciliation.sandbox import SandboxError, find_foreign_constants, run_proof_code
 
+# fee and gst are quantized to 0.01 at each step, matching
+# models.PaymentRecord.fee/gst (and therefore the ledger amounts the mock data
+# is built from). Computing them unrounded here reproduced the ledger only by
+# eating into TOLERANCE, which is reserved for genuine rounding noise.
 _NET_SETTLEMENT_CODE = """
 def compute(inputs):
+    cent = Decimal("0.01")
     amount = Decimal(str(inputs["amount"]))
     fee_rate = Decimal(str(inputs["fee_rate"]))
     gst_rate = Decimal(str(inputs["gst_rate"]))
     refund = Decimal(str(inputs["refund_amount"]))
-    fee = amount * fee_rate
-    gst = fee * gst_rate
+    fee = (amount * fee_rate).quantize(cent)
+    gst = (fee * gst_rate).quantize(cent)
     return amount - fee - gst - refund
 """
 
 _GST_FEE_MISS_CODE = """
 def compute(inputs):
+    cent = Decimal("0.01")
     amount = Decimal(str(inputs["amount"]))
     fee_rate = Decimal(str(inputs["fee_rate"]))
     refund = Decimal(str(inputs["refund_amount"]))
-    fee = amount * fee_rate
+    fee = (amount * fee_rate).quantize(cent)
     return amount - fee - refund
 """
 
 _REFUND_NOT_REFLECTED_CODE = """
 def compute(inputs):
+    cent = Decimal("0.01")
     amount = Decimal(str(inputs["amount"]))
     fee_rate = Decimal(str(inputs["fee_rate"]))
     gst_rate = Decimal(str(inputs["gst_rate"]))
-    fee = amount * fee_rate
-    gst = fee * gst_rate
+    fee = (amount * fee_rate).quantize(cent)
+    gst = (fee * gst_rate).quantize(cent)
     return amount - fee - gst
 """
 

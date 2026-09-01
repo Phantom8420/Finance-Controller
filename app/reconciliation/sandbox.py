@@ -66,6 +66,14 @@ def _validate_ast(code: str) -> ast.Module:
             raise SandboxError(f"proof code may not access dunder attribute '.{node.attr}'")
         if isinstance(node, (ast.Global, ast.Nonlocal)):
             raise SandboxError("proof code may not declare global/nonlocal names")
+        # Dunder access hidden inside a string literal — "{0.__class__}".format(x),
+        # "%(__class__)s" % x, str.format_map — is invisible to the checks above
+        # because it is a plain Constant, not an Attribute/Name node. A proof
+        # script does arithmetic; it never needs "__" in a string.
+        if isinstance(node, ast.Constant) and isinstance(node.value, str) and "__" in node.value:
+            raise SandboxError("proof code may not embed dunder access in a string literal")
+        if isinstance(node, ast.Attribute) and node.attr in ("format", "format_map"):
+            raise SandboxError("proof code may not use str.format / str.format_map")
 
     return tree
 
