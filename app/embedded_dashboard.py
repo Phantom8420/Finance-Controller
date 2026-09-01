@@ -44,7 +44,12 @@ _SIDEBAR_CSS = """
   background: #030303;
   border-right: 1px solid rgba(255,255,255,0.08);
 }
-[data-testid="stSidebar"] * {
+/* :not(...) here matters — a bare `*` also caught Streamlit's own icon
+   glyphs (data-testid="stIconMaterial", e.g. the sidebar collapse arrow),
+   which render via the Material Symbols ligature font. Forcing Inter onto
+   them broke the glyph and showed the raw ligature name ("keyboard_
+   double_arrow_left") as literal text instead of an icon. */
+[data-testid="stSidebar"] *:not([data-testid="stIconMaterial"]) {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
