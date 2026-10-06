@@ -34,16 +34,23 @@ body {
   padding: 20px 24px 26px;
 }
 
-/* Inside Streamlit the page already frames the iframe, so drop our own
-   outer padding and border and let the dashboard use the full width. */
-body.embedded {
-  padding: 0;
-}
+/* The dashboard is the whole page: no outer frame, nav docked to the
+   bottom edge. */
+body { padding: 0; }
 
-body.embedded .shell {
+.shell {
   max-width: none;
+  min-height: 100vh;
+  box-sizing: border-box;
   border: 0;
   border-radius: 0;
+  margin: 0;
+  padding: 24px 32px 96px;
+}
+
+/* Inside Streamlit the iframe is sized by app.js, so 100vh would loop. */
+body.embedded .shell {
+  min-height: 0;
   padding: 8px 4px 20px;
 }
 
@@ -180,9 +187,8 @@ body.embedded .shell {
 .footer-nav {
   display: flex; justify-content: center; align-items: center; gap: 2px;
   width: fit-content; margin: 24px auto 0;
-  position: sticky; bottom: 12px; z-index: 5;
-  background-color: var(--bg);
-  background: rgba(255, 255, 255, 0.03);
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 5;
+  background: #0b0b0b;
   border: 1px solid var(--line-dim);
   border-radius: 999px;
   padding: 6px;
@@ -199,9 +205,10 @@ body.embedded .shell {
 .footer-nav-item:hover:not(.active) { background: rgba(255, 255, 255, 0.06); color: var(--fg); }
 .footer-nav-item.active { color: var(--bg); background: var(--teal); font-weight: 600; }
 
+body.embedded .footer-nav { position: sticky; transform: none; left: auto; bottom: 12px; }
+
 @media (max-width: 560px) {
-  body { padding: 10px; }
-  .shell { padding: 14px 12px 20px; }
+  .shell { padding: 14px 12px 96px; }
   .footer-nav-item span { display: none; }
   .footer-nav-item { padding: 10px 18px; }
 }

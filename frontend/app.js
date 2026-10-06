@@ -512,7 +512,9 @@ function fitEmbeddedFrame() {
   if (!frame) return;
   document.body.classList.add("embedded");
   const fit = () => {
-    frame.style.height = document.documentElement.getBoundingClientRect().height + "px";
+    const content = document.documentElement.getBoundingClientRect().height;
+    const page = window.parent.innerHeight - 80;
+    frame.style.height = Math.max(content, page) + "px";
   };
   try {
     new ResizeObserver(fit).observe(document.body);
