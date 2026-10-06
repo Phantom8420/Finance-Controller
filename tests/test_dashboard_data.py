@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 
 from app.dashboard_data import build_payload
-from app.embedded_dashboard import build_embedded_html, build_empty_state_html
+from app.embedded_dashboard import build_embedded_html, build_fullscreen_css, build_landing_html
 from app.reconciliation.engine import reconcile
 from app.reconciliation.models import LedgerEntry, PaymentRecord
 from app.reconciliation.proof_chain import ProofChain
@@ -98,9 +98,15 @@ def test_build_embedded_html_inlines_css_and_injects_data():
     assert "pay_0002" in html  # real data actually made it into the page
 
 
-def test_empty_state_shares_the_same_design_language():
-    html = build_empty_state_html()
-    assert "<style>" in html
-    assert 'class="shell"' in html  # same shell/card classes as the real dashboard
-    assert 'class="card"' in html
-    assert "Run pipeline" in html
+def test_dock_has_a_run_again_button_for_the_streamlit_embed():
+    payments, ledger, proofs, chain = _sample_run()
+    throughput = {"records": 2, "seconds": 0.01, "records_per_second": 200.0}
+    payload = build_payload(payments, ledger, proofs, chain, throughput, "mock", run_self_tests=False)
+    html = build_embedded_html(payload)
+    assert 'id="rerun-btn"' in html
+    assert "Run again" in html
+
+
+def test_landing_and_fullscreen_css_are_available():
+    assert "AI Finance Controller" in build_landing_html()
+    assert "position: fixed" in build_fullscreen_css()

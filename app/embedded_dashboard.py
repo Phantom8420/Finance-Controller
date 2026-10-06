@@ -12,125 +12,64 @@ from pathlib import Path
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
-_EMPTY_STATE_TEMPLATE = """<!doctype html>
-<html><head><meta charset="UTF-8" /><style>{css}</style></head>
-<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
-  <div class="shell" style="max-width:480px;display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 32px;">
-    <div class="brand-mark" style="margin-bottom:16px;">🧾</div>
-    <div style="font-size:20px;font-weight:700;">AI Finance Controller</div>
-    <div style="color:var(--muted);font-size:13px;margin:6px 0 22px;">
-      Prove it, balance it, break it — Razorpay AI Buildathon, Track 04
-    </div>
-    <div class="card" style="width:100%;">
-      <div style="font-size:13.5px;">
-        Click <strong style="color:var(--teal)">Run pipeline</strong> in the sidebar to reconcile a batch.
-      </div>
-    </div>
-  </div>
-</body></html>"""
-
-
-def build_empty_state_html() -> str:
-    """Landing state, before the first pipeline run — same shell, brand
-    mark, and card styling as the real dashboard, so the two don't look
-    like two different apps."""
-    css = (FRONTEND_DIR / "styles.css").read_text(encoding="utf-8")
-    return _EMPTY_STATE_TEMPLATE.format(css=css)
-
-
-_SIDEBAR_CSS = """
+_PAGE_CSS = """
 <style>
-[data-testid="stSidebar"] {
-  background: #030303;
-  border-right: 1px solid rgba(255,255,255,0.08);
+html, body, [data-testid="stApp"] { background: #000; }
+header[data-testid="stHeader"], [data-testid="stSidebar"],
+[data-testid="stSidebarCollapsedControl"], [data-testid="stToolbar"] { display: none; }
+.block-container {
+  min-height: 100vh; max-width: 420px;
+  display: flex; flex-direction: column; justify-content: center; gap: 0.9rem;
 }
-/* :not(...) here matters — a bare `*` also caught Streamlit's own icon
-   glyphs (data-testid="stIconMaterial", e.g. the sidebar collapse arrow),
-   which render via the Material Symbols ligature font. Forcing Inter onto
-   them broke the glyph and showed the raw ligature name ("keyboard_
-   double_arrow_left") as literal text instead of an icon. */
-[data-testid="stSidebar"] *:not([data-testid="stIconMaterial"]) {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
+/* the dock clicks this from inside the iframe, so it only has to exist */
+.st-key-rerun { position: fixed; left: -9999px; }
 
-.sidebar-brand {
-  display: flex; align-items: center; gap: 12px;
-  padding-bottom: 18px; margin-bottom: 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-.sidebar-brand .mark {
-  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-  border: 1.5px solid #7ec8c2;
+.landing { text-align: center; }
+.landing .mark {
+  width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 14px;
+  border: 1.5px solid #7ec8c2; font-size: 24px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
 }
-.sidebar-brand .title { font-weight: 700; font-size: 15px; color: #fff; line-height: 1.3; }
-.sidebar-brand .subtitle { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+.landing .title { font-size: 24px; font-weight: 700; color: #fff; }
+.landing .subtitle { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 6px; }
 
-.sidebar-status {
-  border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
-  padding: 10px 12px; margin-top: 14px; font-size: 11.5px;
-  color: rgba(255,255,255,0.7); line-height: 1.6;
-}
-.sidebar-status b { color: #7ec8c2; }
-
-/* slider */
-[data-testid="stSlider"] [role="slider"] {
-  background-color: #7ec8c2 !important;
-  border-color: #7ec8c2 !important;
-}
+[data-testid="stSlider"] [role="slider"] { background-color: #7ec8c2 !important; border-color: #7ec8c2 !important; }
 [data-testid="stTickBar"] { display: none; }
 [data-baseweb="slider"] > div > div:nth-child(2) { background: #7ec8c2 !important; }
 
-/* primary button, pill-styled to match the dashboard's own CTA */
-[data-testid="stSidebar"] .stButton > button {
-  background: transparent !important;
-  border: 1.5px solid #7ec8c2 !important;
-  color: #7ec8c2 !important;
-  border-radius: 999px !important;
-  font-weight: 600 !important;
+.stButton > button {
+  background: transparent !important; border: 1.5px solid #7ec8c2 !important;
+  color: #7ec8c2 !important; border-radius: 999px !important; font-weight: 600 !important;
   transition: background 0.15s ease, color 0.15s ease;
 }
-[data-testid="stSidebar"] .stButton > button:hover {
-  background: #7ec8c2 !important;
-  color: #000 !important;
-}
+.stButton > button:hover { background: #7ec8c2 !important; color: #000 !important; }
+</style>
+"""
 
-/* alert boxes (success/info) */
-[data-testid="stSidebar"] [data-testid="stAlert"] {
-  border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-}
+# After a run the dashboard owns the screen: the iframe is pinned to the
+# viewport and Streamlit's own padding goes away.
+_FULLSCREEN_CSS = """
+<style>
+.block-container { max-width: none; padding: 0; min-height: 0; }
+iframe { position: fixed; inset: 0; width: 100vw; height: 100vh; border: 0; z-index: 1000; }
 </style>
 """
 
 
-def build_sidebar_css() -> str:
-    """Reskins Streamlit's native sidebar widgets (slider, button, alerts)
-    to match the embedded dashboard's design system, since those widgets
-    have to stay real Streamlit components — they trigger an actual
-    Python pipeline run, which nothing inside the sandboxed iframe can do."""
-    return _SIDEBAR_CSS
+def build_page_css() -> str:
+    return _PAGE_CSS
 
 
-def build_sidebar_brand_html() -> str:
+def build_fullscreen_css() -> str:
+    return _FULLSCREEN_CSS
+
+
+def build_landing_html() -> str:
     return (
-        '<div class="sidebar-brand">'
+        '<div class="landing">'
         '<div class="mark">🧾</div>'
-        "<div>"
         '<div class="title">AI Finance Controller</div>'
         '<div class="subtitle">Track 04 · Prove it, balance it, break it</div>'
-        "</div>"
-        "</div>"
-    )
-
-
-def build_sidebar_status_html(data_source: str, batch_size: int) -> str:
-    label = "Razorpay test-mode" if data_source == "razorpay_test_mode" else "Mock"
-    return (
-        '<div class="sidebar-status">'
-        f"<div>Source: <b>{label}</b></div>"
-        f"<div>Records: <b>{batch_size}</b></div>"
         "</div>"
     )
 

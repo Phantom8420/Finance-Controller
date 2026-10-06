@@ -48,12 +48,6 @@ body { padding: 0; }
   padding: 24px 32px 96px;
 }
 
-/* Inside Streamlit the iframe is sized by app.js, so 100vh would loop. */
-body.embedded .shell {
-  min-height: 0;
-  padding: 8px 4px 20px;
-}
-
 /* ---------- Header ---------- */
 .header {
   display: flex;
@@ -205,7 +199,8 @@ body.embedded .shell {
 .footer-nav-item:hover:not(.active) { background: rgba(255, 255, 255, 0.06); color: var(--fg); }
 .footer-nav-item.active { color: var(--bg); background: var(--teal); font-weight: 600; }
 
-body.embedded .footer-nav { position: sticky; transform: none; left: auto; bottom: 12px; }
+.footer-nav-item[hidden] { display: none; }
+.footer-nav-item.rerun { color: var(--teal); }
 
 @media (max-width: 560px) {
   .shell { padding: 14px 12px 96px; }

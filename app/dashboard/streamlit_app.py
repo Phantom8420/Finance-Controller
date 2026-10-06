@@ -1,5 +1,6 @@
-"""Streamlit shell around the custom black/teal/orange dashboard: native
-sidebar controls (batch size, Run pipeline) trigger a real pipeline run,
+"""Streamlit shell around the custom black/teal/orange dashboard: a centred
+landing page (batch size, Run pipeline) triggers a real pipeline run, then
+the dashboard takes over the whole screen with "Run again" in its nav dock;
 whose results are injected into the same frontend/{index.html,styles.css,
 app.js} used by the standalone static site — rendered here via
 st.components.v1.html(), so there's one canonical design, fed by a live
@@ -24,10 +25,9 @@ from app import razorpay_client
 from app.dashboard_data import build_payload
 from app.embedded_dashboard import (
     build_embedded_html,
-    build_empty_state_html,
-    build_sidebar_brand_html,
-    build_sidebar_css,
-    build_sidebar_status_html,
+    build_fullscreen_css,
+    build_landing_html,
+    build_page_css,
 )
 from app.metrics import measure_throughput
 from app.reconciliation.proof_chain import ProofChain
@@ -36,24 +36,30 @@ from data.mock_source import generate_mock_payments
 
 FIXTURES_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "fixtures"
 
-st.set_page_config(page_title="AI Finance Controller", layout="wide")
+st.set_page_config(page_title="AI Finance Controller", layout="wide", initial_sidebar_state="collapsed")
 
-st.markdown(build_sidebar_css(), unsafe_allow_html=True)
-st.sidebar.markdown(build_sidebar_brand_html(), unsafe_allow_html=True)
-
-n = st.sidebar.slider("Batch size", 20, 200, 60, step=10)
-run_clicked = st.sidebar.button("Run pipeline", type="primary", use_container_width=True)
+st.markdown(build_page_css(), unsafe_allow_html=True)
 
 if "payload" not in st.session_state:
     st.session_state.payload = None
+    st.session_state.n = 60
 
-if run_clicked:
+# "Run again" lives in the dashboard's nav dock; the dock clicks this button
+# (kept off-screen) because only Python can run the pipeline.
+rerun_clicked = st.button("Run again", key="rerun")
+run_clicked = False
+
+if st.session_state.payload is None:
+    st.markdown(build_landing_html(), unsafe_allow_html=True)
+    st.session_state.n = st.slider("Batch size", 20, 200, st.session_state.n, step=10)
+    run_clicked = st.button("Run pipeline", type="primary", use_container_width=True)
+
+if run_clicked or rerun_clicked:
+    n = st.session_state.n
     if razorpay_client.has_live_keys():
-        st.sidebar.success("Using live Razorpay test-mode data")
         payments = razorpay_client.fetch_payments(count=n)
         data_source = "razorpay_test_mode"
     else:
-        st.sidebar.info("No Razorpay keys configured — using mock Source A data")
         payments = generate_mock_payments(n=n)
         data_source = "mock"
 
@@ -74,16 +80,8 @@ if run_clicked:
         payload = build_payload(payments, ledger, proofs, chain, throughput, data_source)
 
     st.session_state.payload = payload
+    st.rerun()
 
-if st.session_state.payload is None:
-    components.html(build_empty_state_html(), height=400)
-    st.stop()
-
-st.sidebar.markdown(
-    build_sidebar_status_html(
-        st.session_state.payload["data_source"], st.session_state.payload["batch_size"]
-    ),
-    unsafe_allow_html=True,
-)
-
-components.html(build_embedded_html(st.session_state.payload), height=950, scrolling=True)
+if st.session_state.payload is not None:
+    st.markdown(build_fullscreen_css(), unsafe_allow_html=True)
+    components.html(build_embedded_html(st.session_state.payload), height=900, scrolling=True)

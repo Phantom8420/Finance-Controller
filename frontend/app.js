@@ -504,25 +504,27 @@ function renderForecastView(f) {
     ${dots}${labels}</svg>`;
 }
 
-// Inside Streamlit the dashboard sits in a fixed-height iframe, which gave
-// it a second scrollbar and clipped the views. The srcdoc frame is
-// same-origin, so just size the frame to the content.
-function fitEmbeddedFrame() {
-  const frame = window.frameElement;
-  if (!frame) return;
-  document.body.classList.add("embedded");
-  const fit = () => {
-    const content = document.documentElement.getBoundingClientRect().height;
-    const page = window.parent.innerHeight - 80;
-    frame.style.height = Math.max(content, page) + "px";
-  };
+// In Streamlit the dashboard is a full-screen iframe. The pipeline can only
+// run from Python, so "Run again" clicks the app's own button in the parent
+// page (the srcdoc frame is same-origin).
+function initRerun() {
+  const btn = document.getElementById("rerun-btn");
+  if (!btn) return;
+  let parentDoc = null;
   try {
-    new ResizeObserver(fit).observe(document.body);
-    fit();
+    parentDoc = window.frameElement && window.parent.document;
   } catch (e) {
-    /* cross-origin frame: keep the fixed height */
+    /* cross-origin: no Streamlit to talk to */
   }
+  if (!parentDoc) return;
+  btn.hidden = false;
+  btn.addEventListener("click", () => {
+    const target = [...parentDoc.querySelectorAll("button")].find((b) => b.textContent.trim() === "Run again");
+    if (!target) return;
+    btn.querySelector("span").textContent = "Running…";
+    target.click();
+  });
 }
 
-fitEmbeddedFrame();
+initRerun();
 main();
