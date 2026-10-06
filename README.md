@@ -70,6 +70,10 @@ python scripts/export_dashboard_data.py   # writes frontend/data.json
 python -m http.server 8502 --directory frontend
 ```
 
+Open `http://localhost:8502/index.html?demo` to browse a mock batch with
+exceptions (regenerate it with `python scripts/export_dashboard_data.py --mock -n 40`).
+The Reconciliation view lets you click any record to see its proof and hash chain.
+
 ## Deploy to Streamlit Community Cloud
 
 1. Push this repo to GitHub (already done — it's public).

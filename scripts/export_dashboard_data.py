@@ -6,6 +6,7 @@ directly on a live run instead of reading this file.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -26,8 +27,8 @@ from data.mock_source import generate_mock_payments
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 
-def main(n: int = 60) -> None:
-    if razorpay_client.has_live_keys():
+def main(n: int = 60, mock: bool = False) -> None:
+    if razorpay_client.has_live_keys() and not mock:
         payments = razorpay_client.fetch_payments(count=n)
         data_source = "razorpay_test_mode"
     else:
@@ -43,10 +44,19 @@ def main(n: int = 60) -> None:
 
     payload = build_payload(payments, ledger, proofs, chain, throughput, data_source)
 
+    out = FRONTEND_DIR / ("data.demo.json" if mock else "data.json")
     FRONTEND_DIR.mkdir(parents=True, exist_ok=True)
-    (FRONTEND_DIR / "data.json").write_text(json.dumps(payload, indent=2))
-    print(f"Wrote {FRONTEND_DIR / 'data.json'}")
+    out.write_text(json.dumps(payload, indent=2))
+    print(f"Wrote {out}")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-n", type=int, default=60, help="batch size")
+    parser.add_argument(
+        "--mock",
+        action="store_true",
+        help="force mock data (with injected mismatches) into data.demo.json; open the dashboard with ?demo",
+    )
+    args = parser.parse_args()
+    main(n=args.n, mock=args.mock)

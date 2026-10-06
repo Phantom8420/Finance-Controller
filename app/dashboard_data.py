@@ -40,6 +40,44 @@ def _exception_reason_breakdown(proofs: list[ProofRecord]) -> list:
     ]
 
 
+def _record_rows(
+    payments: list[PaymentRecord], proofs: list[ProofRecord], reverify_records: list[dict]
+) -> list[dict]:
+    """One row per proof, joined with its payment and its live re-verify
+    result, so the frontend can drill from a record down to the proof."""
+    by_payment = {p.payment_id: p for p in payments}
+    checks = {r["record_id"]: r for r in reverify_records}
+    rows = []
+    for proof in proofs:
+        payment = by_payment.get(proof.payment_id)
+        check = checks.get(proof.record_id, {})
+        rows.append(
+            {
+                "record_id": proof.record_id,
+                "payment_id": proof.payment_id,
+                "ledger_entry_id": proof.ledger_entry_id,
+                "method": payment.method if payment else None,
+                "amount": str(payment.amount) if payment else None,
+                "captured_at": payment.captured_at.isoformat() if payment else None,
+                "rule_type": proof.rule_type,
+                "is_exception": proof.is_exception,
+                "verified": proof.verified,
+                "confidence": proof.confidence,
+                "reason": proof.reason,
+                "expected_value": str(proof.expected_value) if proof.expected_value is not None else None,
+                "actual_value": str(proof.actual_value) if proof.actual_value is not None else None,
+                "proof_code": proof.proof_code,
+                "inputs": {k: str(v) for k, v in proof.inputs.items()},
+                "hash": proof.hash,
+                "prev_hash": proof.prev_hash,
+                "math_ok": check.get("math_ok"),
+                "link_ok": check.get("link_ok"),
+                "recomputed_value": check.get("recomputed_value"),
+            }
+        )
+    return rows
+
+
 def build_payload(
     payments: list[PaymentRecord],
     ledger: list[LedgerEntry],
@@ -79,5 +117,6 @@ def build_payload(
         "forecast": forecast,
         "rule_type_breakdown": _rule_type_breakdown(proofs),
         "exception_reason_breakdown": _exception_reason_breakdown(proofs),
+        "records": _record_rows(payments, proofs, reverify["records"]),
         "exceptions": [{"payment_id": p.payment_id, "reason": p.reason} for p in proofs if p.is_exception],
     }

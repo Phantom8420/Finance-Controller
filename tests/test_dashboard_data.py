@@ -71,6 +71,19 @@ def test_build_payload_is_json_serializable():
     json.dumps(payload)  # raises if anything non-serializable (e.g. a raw Decimal) leaked through
 
 
+def test_build_payload_includes_per_record_proofs():
+    payments, ledger, proofs, chain = _sample_run()
+    throughput = {"records": 2, "seconds": 0.01, "records_per_second": 200.0}
+    payload = build_payload(payments, ledger, proofs, chain, throughput, "mock", run_self_tests=False)
+
+    records = payload["records"]
+    assert [r["payment_id"] for r in records] == ["pay_0001", "pay_0002"]
+    assert [r["is_exception"] for r in records] == [False, True]
+    for r in records:
+        assert r["hash"] and r["math_ok"] is not None and r["link_ok"] is True
+        assert all(isinstance(v, str) for v in r["inputs"].values())
+
+
 def test_build_embedded_html_inlines_css_and_injects_data():
     payments, ledger, proofs, chain = _sample_run()
     throughput = {"records": 2, "seconds": 0.01, "records_per_second": 200.0}

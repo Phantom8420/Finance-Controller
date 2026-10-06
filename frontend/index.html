@@ -32,10 +32,11 @@
     </div>
   </div>
 
+  <section class="view" id="view-dashboard" data-view="dashboard">
   <div class="grid">
 
     <!-- Column 1 -->
-    <div class="col" data-tab="reconciliation">
+    <div class="col">
       <div class="card donut-card">
         <div class="card-title">Reconciliation for this batch</div>
         <div class="card-sub" id="donut-sub">—</div>
@@ -59,7 +60,7 @@
     </div>
 
     <!-- Column 2 -->
-    <div class="col" data-tab="reconciliation">
+    <div class="col">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
           <div>
@@ -103,7 +104,7 @@
     </div>
 
     <!-- Column 3 -->
-    <div class="col" data-tab="forecast">
+    <div class="col">
       <div class="card">
         <div class="card-title">Cash forecast</div>
         <div class="card-sub">Settlement-timing projection, not a revenue forecast</div>
@@ -136,6 +137,57 @@
     </div>
 
   </div>
+  </section>
+
+  <!-- Reconciliation view: every record, drill into its proof -->
+  <section class="view" id="view-reconciliation" data-view="reconciliation" hidden>
+    <div class="stat-strip" id="recon-strip"></div>
+    <div class="recon-layout">
+      <div class="card recon-list-card">
+        <div class="recon-toolbar">
+          <div class="seg" id="recon-filter">
+            <button class="seg-btn active" data-filter="all">All</button>
+            <button class="seg-btn" data-filter="exceptions">Exceptions</button>
+            <button class="seg-btn" data-filter="verified">Verified</button>
+          </div>
+          <input id="recon-search" class="field" type="text" placeholder="Search payment id…" />
+        </div>
+        <div class="table-wrap">
+          <table class="records" id="records-table">
+            <thead><tr><th>Payment</th><th>Method</th><th class="num">Amount</th><th>Rule</th><th>Status</th></tr></thead>
+            <tbody id="records-body"></tbody>
+          </table>
+        </div>
+        <div class="card-sub" id="records-empty" hidden style="padding:14px 4px;">No records match.</div>
+      </div>
+      <div class="card detail-card" id="detail-card"></div>
+    </div>
+  </section>
+
+  <!-- Forecast view -->
+  <section class="view" id="view-forecast" data-view="forecast" hidden>
+    <div class="stat-strip" id="forecast-strip"></div>
+    <div class="forecast-layout">
+      <div class="card">
+        <div class="card-title">Projected cash position</div>
+        <div class="card-sub">Settlement-timing projection, not a revenue forecast</div>
+        <div id="forecast-chart" class="big-chart"></div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="card-title">Assumptions</div>
+          <ul class="assumptions" id="forecast-assumptions"></ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Day by day</div>
+          <div class="table-wrap" style="max-height:240px;">
+            <table class="records"><thead><tr><th>Day</th><th class="num">Projected cash</th></tr></thead>
+            <tbody id="forecast-table"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <nav class="footer-nav">
     <div class="footer-nav-item active" data-target="dashboard">
@@ -150,7 +202,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"></polyline><polyline points="15 7 21 7 21 13"></polyline></svg>
       <span>Forecast</span>
     </div>
-    <a class="footer-nav-item" href="https://github.com/Specter842/razorpay-finance-controller#readme" target="_blank" rel="noopener">
+    <a class="footer-nav-item" href="https://github.com/Phantom8420/Finance-Controller#readme" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="15" y2="17"></line></svg>
       <span>Docs</span>
     </a>
