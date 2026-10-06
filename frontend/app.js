@@ -504,4 +504,23 @@ function renderForecastView(f) {
     ${dots}${labels}</svg>`;
 }
 
+// Inside Streamlit the dashboard sits in a fixed-height iframe, which gave
+// it a second scrollbar and clipped the views. The srcdoc frame is
+// same-origin, so just size the frame to the content.
+function fitEmbeddedFrame() {
+  const frame = window.frameElement;
+  if (!frame) return;
+  document.body.classList.add("embedded");
+  const fit = () => {
+    frame.style.height = document.documentElement.getBoundingClientRect().height + "px";
+  };
+  try {
+    new ResizeObserver(fit).observe(document.body);
+    fit();
+  } catch (e) {
+    /* cross-origin frame: keep the fixed height */
+  }
+}
+
+fitEmbeddedFrame();
 main();

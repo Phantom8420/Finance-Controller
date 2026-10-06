@@ -34,6 +34,19 @@ body {
   padding: 20px 24px 26px;
 }
 
+/* Inside Streamlit the page already frames the iframe, so drop our own
+   outer padding and border and let the dashboard use the full width. */
+body.embedded {
+  padding: 0;
+}
+
+body.embedded .shell {
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  padding: 8px 4px 20px;
+}
+
 /* ---------- Header ---------- */
 .header {
   display: flex;
